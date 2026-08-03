@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>idk - Loading Screen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            color: #ffffff;
+            user-select: none;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 500px;
+            width: 80%;
+        }
+
+        .server-name {
+            font-size: 2.4em;
+            font-weight: 300;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: #cccccc;
+            margin-bottom: 50px;
+        }
+
+        .server-name span {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .spinner {
+            width: 28px;
+            height: 28px;
+            margin: 0 auto 30px auto;
+            border: 2px solid #333333;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status {
+            font-size: 0.75em;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #666666;
+            animation: fade 2s ease-in-out infinite;
+        }
+
+        @keyframes fade {
+            0%, 100% { opacity: 0.4; }
+            50%      { opacity: 1; }
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.65em;
+            letter-spacing: 2px;
+            color: #444444;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="server-name">
+            <span>SERVER</span> NAME
+        </div>
+
+        <div class="spinner"></div>
+
+        <div class="status">
+            загрузка
+        </div>
+    </div>
+
+    <div class="footer">
+        discord.gg/example
+    </div>
+
+</body>
+</html>
