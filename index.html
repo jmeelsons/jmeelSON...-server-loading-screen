@@ -14,19 +14,54 @@
         body {
             width: 100vw;
             height: 100vh;
-            background: #1a1a1a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            overflow: hidden;
             font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
             color: #ffffff;
             user-select: none;
+            background: #1a1a1a;
+        }
+
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .video-background video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: cover;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1;
         }
 
         .container {
+            position: relative;
+            z-index: 2;
             text-align: center;
             max-width: 500px;
             width: 80%;
+            margin: 0 auto;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .server-name {
@@ -36,18 +71,20 @@
             text-transform: uppercase;
             color: #cccccc;
             margin-bottom: 50px;
+            text-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
         }
 
         .server-name span {
             font-weight: 600;
             color: #ffffff;
+            text-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
         }
 
         .spinner {
             width: 28px;
             height: 28px;
             margin: 0 auto 30px auto;
-            border: 2px solid #333333;
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-top-color: #ffffff;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
@@ -63,8 +100,9 @@
             font-size: 0.75em;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: #666666;
+            color: rgba(255, 255, 255, 0.5);
             animation: fade 2s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
         }
 
         @keyframes fade {
@@ -73,28 +111,39 @@
         }
 
         .footer {
-            position: absolute;
+            position: fixed;
             bottom: 30px;
             left: 0;
             width: 100%;
             text-align: center;
             font-size: 0.65em;
             letter-spacing: 2px;
-            color: #444444;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 2;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
         }
     </style>
 </head>
 <body>
 
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="video/background.mp4" type="video/mp4">
+            Ваш браузер не поддерживает видео. Сорян :P
+        </video>
+    </div>
+
+    <div class="overlay"></div>
+
     <div class="container">
         <div class="server-name">
-            <span>SERVER</span> NAME
+            <span>SUPER-SERVER!</span>
         </div>
 
         <div class="spinner"></div>
 
         <div class="status">
-            загрузка
+            подключение...
         </div>
     </div>
 
