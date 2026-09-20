@@ -49,62 +49,124 @@
     }
 
     .server-name {
-      color: rgba(220, 60, 60, 0.95);
-      font-weight: 300;
-      font-size: 2.2rem;
+      font-weight: 800;
+      font-size: 5rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 2rem;
-      text-shadow: 0 0 30px rgba(155, 0, 0, 0.3), 0 2px 12px rgba(0, 0, 0, 0.5);
+      margin-bottom: 0.8rem;
+      text-shadow: 0 0 40px rgba(155, 0, 0, 0.35), 0 2px 16px rgba(0, 0, 0, 0.6);
       font-family: inherit;
       text-align: center;
-      line-height: 1.2;
+      line-height: 1.1;
     }
 
-    .spinner {
+    .server-name .red {
+      color: rgba(220, 60, 60, 0.95);
+    }
+
+    .server-name .white {
+      color: #ffffff;
+    }
+
+    .changing-messages {
+      position: relative;
+      height: 2.4rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.8rem;
+      width: 100%;
+      max-width: 600px;
+      padding: 0 1rem;
+      margin-top: 0.2rem;
     }
 
-    .dot {
-      width: 16px;
-      height: 16px;
+    .message {
+      position: absolute;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: #b0b0b8;
+      font-size: 1.05rem;
+      letter-spacing: 0.12em;
+      font-weight: 300;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none;
+      text-shadow: 0 0 10px rgba(200, 60, 60, 0.15);
+      white-space: nowrap;
+    }
+
+    .message.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .message-line {
+      width: 120px;
+      height: 1px;
+      margin-top: 0.6rem;
+      background: linear-gradient(90deg, transparent, rgba(200, 60, 60, 0.4), transparent);
+      opacity: 0.5;
+    }
+
+    .bottom-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      margin-top: 1.4rem;
+    }
+
+    .bottom-dots .bdot {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      opacity: 0.3;
-      transform: scale(0.8);
-      animation: pulse 1.6s ease-in-out infinite alternate;
-      box-shadow: 0 0 6px rgba(180, 50, 50, 0.1);
+      background: #cc3333;
+      opacity: 0.25;
+      transform: scale(0.7);
+      animation: bdotPulse 1.2s ease-in-out infinite;
     }
 
-    .dot:nth-child(1) { animation-delay: 0.0s; background: #cc3333; }
-    .dot:nth-child(2) { animation-delay: 0.3s; background: #dd4444; }
-    .dot:nth-child(3) { animation-delay: 0.6s; background: #ee5555; }
-    .dot:nth-child(4) { animation-delay: 0.9s; background: #ff6666; }
+    .bottom-dots .bdot:nth-child(1) { animation-delay: 0s; }
+    .bottom-dots .bdot:nth-child(2) { animation-delay: 0.2s; }
+    .bottom-dots .bdot:nth-child(3) { animation-delay: 0.4s; }
 
-    @keyframes pulse {
-      0% {
+    @keyframes bdotPulse {
+      0%, 100% {
         opacity: 0.2;
-        transform: scale(0.75);
-        box-shadow: 0 0 4px rgba(200, 50, 50, 0.05);
+        transform: scale(0.7);
+        box-shadow: 0 0 3px rgba(200, 50, 50, 0.1);
       }
-      100% {
+      50% {
         opacity: 1;
-        transform: scale(1.1);
-        box-shadow: 0 0 24px rgba(200, 50, 50, 0.4);
+        transform: scale(1.15);
+        box-shadow: 0 0 14px rgba(220, 60, 60, 0.6);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .server-name {
+        font-size: 3.4rem;
       }
     }
 
     @media (max-width: 480px) {
       .server-name {
-        font-size: 1.6rem;
-        margin-bottom: 1.5rem;
+        font-size: 2.4rem;
+        margin-bottom: 0.6rem;
       }
-      .dot {
-        width: 13px;
-        height: 13px;
-        gap: 0.6rem;
+      .changing-messages {
+        height: 2rem;
+      }
+      .message {
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+      }
+      .bottom-dots .bdot {
+        width: 6px;
+        height: 6px;
       }
     }
 
@@ -120,12 +182,26 @@
   </div>
 
   <div class="content">
-    <div class="server-name">BUTTHOLE Z-CITY SERVER</div>
-    <div class="spinner">
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
+    <div class="server-name">
+      <span class="red">J</span><span class="white">-CITY</span>
+    </div>
+
+    <div class="changing-messages" id="changingMessages">
+      <span class="message active">Look behind you.</span>
+      <span class="message">haii everione ^w^</span>
+      <span class="message">Be quiet.</span>
+      <span class="message">it's this? old SNB?</span>
+      <span class="message">Welcome to guys)</span>
+      <span class="message">Some try 'Renchdedsex Server'</span>
+      <span class="message">Nikita Zuev, hi.</span>
+      <span class="message">Nice music huh?</span>
+    </div>
+    <div class="message-line"></div>
+
+    <div class="bottom-dots">
+      <div class="bdot"></div>
+      <div class="bdot"></div>
+      <div class="bdot"></div>
     </div>
   </div>
 
@@ -146,17 +222,15 @@
       }
 
       function draw() {
-        animTime += 0.016; // ~
+        animTime += 0.016;
 
         ctx.clearRect(0, 0, W, H);
-
         ctx.fillStyle = '#0d0d0f';
         ctx.fillRect(0, 0, W, H);
 
         ctx.strokeStyle = 'rgba(155, 0, 0, 0.08)';
         ctx.lineWidth = 1;
 
-        const spacingX = H / xbars;
         for (let i = 1; i <= xbars + 1; i++) {
           let yPos = (H / xbars) * (i - 1) + (animTime * speed % (H / xbars));
           ctx.beginPath();
@@ -165,7 +239,6 @@
           ctx.stroke();
         }
 
-        const spacingY = W / ybars;
         for (let i = 1; i <= ybars + 1; i++) {
           let xPos = (W / ybars) * i - (animTime * speed % (W / ybars));
           ctx.beginPath();
@@ -204,6 +277,19 @@
       window.addEventListener('resize', resize);
       resize();
       draw();
+
+      const messages = document.querySelectorAll('.message');
+      let currentIndex = 0;
+      const totalMessages = messages.length;
+      const interval = 3000;
+
+      function nextMessage() {
+        messages[currentIndex].classList.remove('active');
+        currentIndex = (currentIndex + 1) % totalMessages;
+        messages[currentIndex].classList.add('active');
+      }
+
+      setInterval(nextMessage, interval);
     })();
   </script>
 </body>
