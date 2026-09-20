@@ -50,14 +50,14 @@
 
     .server-name {
       font-weight: 800;
-      font-size: 5rem;
-      letter-spacing: 0.08em;
+      font-size: 12rem;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       margin-bottom: 0.8rem;
-      text-shadow: 0 0 40px rgba(155, 0, 0, 0.35), 0 2px 16px rgba(0, 0, 0, 0.6);
+      text-shadow: 0 0 60px rgba(155, 0, 0, 0.4), 0 2px 20px rgba(0, 0, 0, 0.7);
       font-family: inherit;
       text-align: center;
-      line-height: 1.1;
+      line-height: 1;
     }
 
     .server-name .red {
@@ -146,15 +146,27 @@
       }
     }
 
+    @media (max-width: 1280px) {
+      .server-name {
+        font-size: 9rem;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .server-name {
+        font-size: 7rem;
+      }
+    }
+
     @media (max-width: 768px) {
       .server-name {
-        font-size: 3.4rem;
+        font-size: 5rem;
       }
     }
 
     @media (max-width: 480px) {
       .server-name {
-        font-size: 2.4rem;
+        font-size: 3.2rem;
         margin-bottom: 0.6rem;
       }
       .changing-messages {
@@ -281,7 +293,7 @@
       const messages = document.querySelectorAll('.message');
       let currentIndex = 0;
       const totalMessages = messages.length;
-      const interval = 6000;
+      const interval = 6001;
 
       function nextMessage() {
         messages[currentIndex].classList.remove('active');
