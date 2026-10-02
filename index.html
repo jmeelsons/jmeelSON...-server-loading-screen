@@ -147,39 +147,64 @@
       opacity: 0.5;
     }
 
-    .bottom-dots {
+    .progress-wrap {
+      width: 320px;
+      max-width: 80vw;
+      margin-top: 1.6rem;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.55rem;
-      margin-top: 1.4rem;
+      flex-direction: column;
+      gap: 0.45rem;
     }
 
-    .bottom-dots .bdot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #cc3333;
-      opacity: 0.25;
-      transform: scale(0.7);
-      animation: bdotPulse 1.2s ease-in-out infinite;
+    .progress-info {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #8a8a92;
+      font-weight: 300;
     }
 
-    .bottom-dots .bdot:nth-child(1) { animation-delay: 0s; }
-    .bottom-dots .bdot:nth-child(2) { animation-delay: 0.2s; }
-    .bottom-dots .bdot:nth-child(3) { animation-delay: 0.4s; }
+    .progress-percent {
+      color: rgba(220, 60, 60, 0.95);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      min-width: 3.2em;
+      text-align: left;
+    }
 
-    @keyframes bdotPulse {
-      0%, 100% {
-        opacity: 0.2;
-        transform: scale(0.7);
-        box-shadow: 0 0 3px rgba(200, 50, 50, 0.1);
-      }
-      50% {
-        opacity: 1;
-        transform: scale(1.15);
-        box-shadow: 0 0 14px rgba(220, 60, 60, 0.6);
-      }
+    .progress-file {
+      flex: 1;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #6f6f78;
+      font-size: 0.66rem;
+      letter-spacing: 0.08em;
+    }
+
+    .progress-track {
+      position: relative;
+      width: 100%;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(160, 30, 30, 0.9), rgba(220, 60, 60, 1));
+      box-shadow: 0 0 10px rgba(220, 60, 60, 0.5);
+      border-radius: 2px;
+      transition: width 0.35s ease;
     }
 
     @media (max-width: 1280px) {
@@ -212,12 +237,15 @@
         font-size: 0.85rem;
         letter-spacing: 0.08em;
       }
-      .bottom-dots .bdot {
-        width: 6px;
-        height: 6px;
-      }
       .falling-emojis img {
         width: 28px;
+      }
+      .progress-wrap {
+        width: 240px;
+        margin-top: 1.2rem;
+      }
+      .progress-file {
+        font-size: 0.6rem;
       }
     }
 
@@ -256,10 +284,14 @@
     </div>
     <div class="message-line"></div>
 
-    <div class="bottom-dots">
-      <div class="bdot"></div>
-      <div class="bdot"></div>
-      <div class="bdot"></div>
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="progress-percent" id="progressPercent">0%</span>
+        <span class="progress-file" id="progressFile">wait...</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
     </div>
   </div>
 
@@ -296,7 +328,7 @@
         });
 
         audio.addEventListener('error', () => {
-          console.warn('Не удалось загрузить:', audio.src);
+          console.warn('fucking fail:', audio.src);
           setTimeout(nextTrack, 1000);
         });
       }
