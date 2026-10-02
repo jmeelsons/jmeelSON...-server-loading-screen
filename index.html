@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>huy loading</title>
+  <title>J-CITY loading</title>
   <style>
     * {
       margin: 0;
@@ -207,11 +207,6 @@
       transition: width 0.35s ease;
     }
 
-    /* Скрытые элементы, которые использует main.js */
-    #title, #map, #steamid, #history, #announcement, #debug {
-      display: none;
-    }
-
     @media (max-width: 1280px) {
       .server-name {
         font-size: 9rem;
@@ -304,16 +299,8 @@
     </div>
   </div>
 
-  <div id="title"></div>
-  <div id="map"></div>
-  <div id="steamid"></div>
-  <div id="history"></div>
-  <div id="announcement"></div>
-  <div id="debug"></div>
-
   <script>
     (function() {
-      
       const MUSIC_FILES = [
         'track1.mp3',
         'track2.mp3',
@@ -547,6 +534,50 @@
 
       setInterval(createEmoji, 1200);
 
+      const progressFill = document.getElementById('progressFill');
+      const progressPercent = document.getElementById('progressPercent');
+      const progressFile = document.getElementById('progressFile');
+
+      window.setLoad = function(percentage) {
+        const p = Math.max(0, Math.min(100, percentage));
+        progressFill.style.width = p + '%';
+        progressPercent.textContent = Math.round(p) + '%';
+      };
+
+      const originalDownloadingFile = window.DownloadingFile;
+      window.DownloadingFile = function(filename) {
+        if (typeof originalDownloadingFile === 'function') {
+          originalDownloadingFile(filename);
+        }
+        if (progressFile) {
+          progressFile.textContent = filename.length > 32 ? filename.slice(0, 29) + '...' : filename;
+        }
+      };
+
+      const originalSetStatusChanged = window.SetStatusChanged;
+      window.SetStatusChanged = function(status) {
+        if (typeof originalSetStatusChanged === 'function') {
+          originalSetStatusChanged(status);
+        }
+        if (progressFile) {
+          progressFile.textContent = status;
+        }
+      };
+
+      if (typeof window.percentage !== 'undefined') {
+        window.setLoad(window.percentage);
+      }
+
+      const originalGameDetails = window.GameDetails;
+      window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
+        if (typeof originalGameDetails === 'function') {
+          originalGameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode);
+        }
+        window.setLoad(0);
+      };
+
+      if (typeof window.isGmod !== 'undefined' && !window.isGmod) {
+      }
     })();
   </script>
 </body>
