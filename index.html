@@ -343,7 +343,7 @@
           playPromise.then(() => {
             fadeTo(TARGET_VOLUME, FADE_IN_TIME);
           }).catch((err) => {
-            console.log('Ожидание взаимодействия пользователя для запуска музыки');
+            console.log('waiting......');
           });
         }
       }
@@ -429,13 +429,22 @@
       draw();
 
       const messages = document.querySelectorAll('.message');
-      let currentIndex = 0;
       const totalMessages = messages.length;
+      let currentIndex = 0;
       const interval = 6001;
+
+      function getRandomDifferentIndex() {
+        if (totalMessages <= 1) return 0;
+        let newIndex;
+        do {
+          newIndex = Math.floor(Math.random() * totalMessages);
+        } while (newIndex === currentIndex);
+        return newIndex;
+      }
 
       function nextMessage() {
         messages[currentIndex].classList.remove('active');
-        currentIndex = (currentIndex + 1) % totalMessages;
+        currentIndex = getRandomDifferentIndex();
         messages[currentIndex].classList.add('active');
       }
 
