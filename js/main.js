@@ -1,4 +1,4 @@
-"use strict";
+"use sctrict";
 
 var isGmod = false;
 var isTest = false;
@@ -24,7 +24,24 @@ function GameDetails(
     loadAll();
   }
 
-  setProgress(0, "wait...");
+  if (Config.title) {
+    $("#title").html(Config.title);
+  } else {
+    $("#title").html(servername);
+  }
+  $("#title").fadeIn();
+
+  if (Config.enableMap) {
+    $("#map").append(mapname);
+    $("#map").fadeIn();
+  } else {
+    $("#map").hide();
+  }
+
+  if (Config.enableSteamID) {
+    $("#steamid").html(steamid);
+  }
+  $("#steamid").fadeIn();
 }
 
 function SetFilesTotal(total) {
@@ -35,39 +52,50 @@ function SetFilesTotal(total) {
 
 function SetFilesNeeded(needed) {
   debug("SetFilesNeeded called needed: " + needed);
-  if (totalCalled && totalFiles > 0) {
+  if (totalCalled) {
     var sPercentage = 100 - Math.round((needed / totalFiles) * 100);
     percentage = sPercentage;
-    setProgress(sPercentage);
+    setLoad(sPercentage);
   }
 }
 
+var fileCount = 0;
 function DownloadingFile(filename) {
   filename = filename.replace("'", "").replace("?", "");
   debug("DownloadingFile called '" + filename + "'");
   downloadingFileCalled = true;
-
-  setProgress(null, filename);
+  $("#history").prepend('<div class="history-item">' + filename + "</div>");
+  $(".history-item").each(function(i, el) {
+    if (i > 10) {
+      $(el).remove();
+    }
+    $(el).css("opacity", "" + 1 - i * 0.1);
+  });
 }
 
 var allow_increment = true;
 function SetStatusChanged(status) {
   debug("SetStatusChanged called '" + status + "'");
-
+  $("#history").prepend('<div class="history-item">' + status + "</div>");
+  $(".history-item").each(function(i, el) {
+    if (i > 10) {
+      $(el).remove();
+    }
+    $(el).css("opacity", "" + 1 - i * 0.1);
+  });
   if (status === "Workshop Complete") {
     allow_increment = false;
-    setProgress(80, "workshop complete");
+    setLoad(80);
   } else if (status === "Client info sent!") {
     allow_increment = false;
-    setProgress(95, "client info sent");
+    setLoad(95);
   } else if (status === "Starting Lua...") {
-    setProgress(100, "starting lua...");
+    setLoad(100);
   } else {
     if (allow_increment) {
       percentage = percentage + 0.1;
-      setProgress(percentage);
+      setLoad(percentage);
     }
-    setProgress(null, status);
   }
 }
 
@@ -75,62 +103,81 @@ function SetStatusChanged(status) {
  * External Functions
  */
 function loadAll() {
-  // nothing to fade, layout always visible
-}
+  $("nav").fadeIn();
+  $("main").fadeIn();
 
+  // first time loading if DownloadingFile isn't called after some time
+  setTimeout(function() {
+    debug("Checking if first time loading.. " + downloadingFileCalled);
+    if (downloadingFileCalled) {
+      announce(
+        "This is your first time joining this server! - Please wait for the files to download...",
+        true
+      );
+    }
+  }, 10000);
+}
 function loadBackground() {
-  // background image disabled in this layout
-}
-
-/**
- * Прогресс-бар
- * @param {number|null} value  процент 0-100 (null — не менять)
- * @param {string} [label]     подпись (имя файла / статус)
- */
-function setProgress(value, label) {
-  var $fill = document.getElementById("progressFill");
-  var $percent = document.getElementById("progressPercent");
-  var $file = document.getElementById("progressFile");
-
-  if (!$fill || !$percent || !$file) return;
-
-  if (typeof value === "number" && !isNaN(value)) {
-    var v = Math.max(0, Math.min(100, value));
-    percentage = v;
-    $fill.style.width = v + "%";
-    $percent.textContent = Math.round(v) + "%";
-  }
-
-  if (typeof label === "string" && label.length) {
-    $file.textContent = label;
+  if (Config.backgroundImage) {
+    $(".background").css(
+      "background-image",
+      'url("images/' + Config.backgroundImage + '")'
+    );
   }
 }
-
 function setLoad(percentage) {
-  setProgress(percentage);
+  debug(percentage + "%");
+  $(".overhaul").css("left", percentage + "%");
 }
-
 var permanent = false;
 function announce(message, ispermanent) {
-  // announcements disabled in this layout
+  if (Config.enableAnnouncements && !permanent) {
+    $("#announcement").hide();
+    $("#announcement").html(message);
+    $("#announcement").fadeIn();
+  }
   if (ispermanent) {
     permanent = true;
   }
 }
-
 function debug(message) {
-  if (typeof Config !== "undefined" && Config.enableDebug) {
+  if (Config.enableDebug) {
     console.log(message);
+    $("#debug").prepend(message + "<br>");
   }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-  setProgress(0, "wait...");
+/**
+ * Initial function
+ */
+$(document).ready(function() {
+  // load everything in when ready
+  loadBackground();
 
+  // print announcement messages every few seconds
+  if (
+    Config.announceMessages &&
+    Config.enableAnnouncements &&
+    Config.announcementLength
+  ) {
+    if (Config.announceMessages.length > 0) {
+      var i = 0;
+      setInterval(function() {
+        announce(Config.announceMessages[i]);
+        i++;
+        if (i > Config.announceMessages.length - 1) {
+          i = 0;
+        }
+      }, Config.announcementLength);
+    }
+  }
+
+  // if it isn't loaded by gmod load manually
   setTimeout(function() {
     if (!isGmod) {
       debug("No Garry's mod testing..");
       isTest = true;
+      loadAll();
 
       GameDetails(
         "Servername",
