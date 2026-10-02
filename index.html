@@ -306,6 +306,7 @@
       let currentTrackIndex = 0;
       let fadeInterval = null;
       let musicStarted = false;
+      let interactionBound = false;
 
       function createAudio() {
         if (audio) return;
@@ -354,7 +355,10 @@
             fadeTo(TARGET_VOLUME, FADE_IN_TIME);
           }).catch(() => {
             musicStarted = false;
+            bindInteraction();
           });
+        } else {
+          bindInteraction();
         }
       }
 
@@ -372,31 +376,39 @@
             fadeTo(TARGET_VOLUME, FADE_IN_TIME);
           }).catch(() => {
             musicStarted = false;
+            bindInteraction();
           });
+        } else {
+          bindInteraction();
         }
       }
 
-      function startOnInteraction() {
-        if (musicStarted) return;
-        if (!audio) createAudio();
+      function bindInteraction() {
+        if (interactionBound) return;
+        interactionBound = true;
 
-        if (!audio.src) {
-          currentTrackIndex = Math.floor(Math.random() * MUSIC_FILES.length);
-          audio.src = MUSIC_PATH + MUSIC_FILES[currentTrackIndex];
-        }
+        const startOnInteraction = () => {
+          if (musicStarted) return;
+          if (!audio) createAudio();
 
-        const p = audio.play();
-        if (p !== undefined) {
-          p.then(() => {
-            musicStarted = true;
-            fadeTo(TARGET_VOLUME, FADE_IN_TIME);
-          }).catch(() => {});
-        }
+          if (!audio.src) {
+            currentTrackIndex = Math.floor(Math.random() * MUSIC_FILES.length);
+            audio.src = MUSIC_PATH + MUSIC_FILES[currentTrackIndex];
+          }
+
+          const p = audio.play();
+          if (p !== undefined) {
+            p.then(() => {
+              musicStarted = true;
+              fadeTo(TARGET_VOLUME, FADE_IN_TIME);
+            }).catch(() => {});
+          }
+        };
+
+        ['click', 'touchstart', 'keydown', 'mousemove', 'scroll'].forEach(ev => {
+          window.addEventListener(ev, startOnInteraction, { once: true, passive: true });
+        });
       }
-
-      ['click', 'touchstart', 'keydown'].forEach(ev => {
-        window.addEventListener(ev, startOnInteraction, { once: false, passive: true });
-      });
 
       tryStartImmediately();
 
