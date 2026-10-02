@@ -182,6 +182,39 @@
       }
     }
 
+    /* Кнопка управления музыкой */
+    .music-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(20, 20, 22, 0.7);
+      border: 1px solid rgba(200, 60, 60, 0.3);
+      color: #cc3333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(6px);
+      font-size: 18px;
+      user-select: none;
+    }
+
+    .music-toggle:hover {
+      background: rgba(40, 20, 20, 0.8);
+      border-color: rgba(220, 60, 60, 0.6);
+      box-shadow: 0 0 20px rgba(200, 50, 50, 0.4);
+    }
+
+    .music-toggle.muted {
+      color: #555;
+      border-color: rgba(100, 100, 100, 0.3);
+    }
+
     @media (max-width: 1280px) {
       .server-name {
         font-size: 9rem;
@@ -258,8 +291,159 @@
     </div>
   </div>
 
+  <div class="music-toggle" id="musicToggle" title="Включить/выключить музыку">♪</div>
+
   <script>
     (function() {
+      
+      const MUSIC_FILES = [
+        'track1.mp3',
+        'track2.mp3',
+        'track3.mp3',
+        'track4.mp3',
+        'track5.mp3',
+        'track6.mp3'        
+      ];
+
+      const MUSIC_PATH = 'music/';
+      const TARGET_VOLUME = 0.35;
+      const FADE_IN_TIME = 4000;
+      const FADE_OUT_TIME = 1500;
+
+      let audio = null;
+      let currentTrackIndex = 0;
+      let fadeInterval = null;
+      let userMuted = false;
+      let audioReady = false;
+
+      const toggleBtn = document.getElementById('musicToggle');
+
+      function createAudio() {
+        if (audio) return;
+        audio = new Audio();
+        audio.loop = false;
+        audio.volume = 0;
+        audio.preload = 'auto';
+
+        audio.addEventListener('ended', () => {
+          nextTrack();
+        });
+
+        audio.addEventListener('error', () => {
+          console.warn('Не удалось загрузить:', audio.src);
+          setTimeout(nextTrack, 1000);
+        });
+      }
+
+      function fadeTo(targetVolume, duration, callback) {
+        if (!audio) return;
+        if (fadeInterval) clearInterval(fadeInterval);
+
+        const startVolume = audio.volume;
+        const startTime = performance.now();
+        const diff = targetVolume - startVolume;
+
+        if (Math.abs(diff) < 0.001) {
+          audio.volume = targetVolume;
+          if (callback) callback();
+          return;
+        }
+
+        fadeInterval = setInterval(() => {
+          const elapsed = performance.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          audio.volume = Math.max(0, Math.min(1, startVolume + diff * eased));
+
+          if (progress >= 1) {
+            clearInterval(fadeInterval);
+            fadeInterval = null;
+            audio.volume = targetVolume;
+            if (callback) callback();
+          }
+        }, 30);
+      }
+
+      function playTrack(index) {
+        if (!audio) createAudio();
+        currentTrackIndex = ((index % MUSIC_FILES.length) + MUSIC_FILES.length) % MUSIC_FILES.length;
+        const file = MUSIC_FILES[currentTrackIndex];
+
+        audio.src = MUSIC_PATH + file;
+        audio.volume = 0;
+
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            audioReady = true;
+            if (!userMuted) {
+              fadeTo(TARGET_VOLUME, FADE_IN_TIME);
+              toggleBtn.classList.remove('muted');
+            }
+          }).catch((err) => {
+            audioReady = false;
+            console.log('Ожидание взаимодействия пользователя для запуска музыки');
+          });
+        }
+      }
+
+      function nextTrack() {
+        if (!audio) return;
+        playTrack(currentTrackIndex + 1);
+      }
+
+      function toggleMute() {
+        if (!audio) {
+
+          playTrack(0);
+          userMuted = false;
+          return;
+        }
+
+        if (userMuted) {
+          userMuted = false;
+          toggleBtn.classList.remove('muted');
+          toggleBtn.textContent = '♪';
+          if (audio.paused) {
+            audio.play().then(() => {
+              fadeTo(TARGET_VOLUME, FADE_IN_TIME);
+            }).catch(() => {});
+          } else {
+            fadeTo(TARGET_VOLUME, 800);
+          }
+        } else {
+          userMuted = true;
+          toggleBtn.classList.add('muted');
+          toggleBtn.textContent = '✕';
+          fadeTo(0, FADE_OUT_TIME);
+        }
+      }
+
+      toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMute();
+      });
+
+      function tryAutoplay() {
+        if (!audio) {
+          createAudio();
+          playTrack(0);
+        } else if (audio.paused && !userMuted) {
+          audio.play().then(() => {
+            fadeTo(TARGET_VOLUME, FADE_IN_TIME);
+          }).catch(() => {});
+        }
+      }
+
+      ['click', 'touchstart', 'keydown', 'mousemove', 'scroll'].forEach(ev => {
+        window.addEventListener(ev, function onFirstInteract() {
+          tryAutoplay();
+        }, { passive: true });
+      });
+
+      createAudio();
+      audio.src = MUSIC_PATH + MUSIC_FILES[0];
+
       const canvas = document.getElementById('bgCanvas');
       const ctx = canvas.getContext('2d');
 
