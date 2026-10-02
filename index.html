@@ -39,6 +39,42 @@
       height: 100%;
     }
 
+    .falling-emojis {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 2;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .falling-emojis img {
+      position: absolute;
+      top: -80px;
+      user-select: none;
+      will-change: transform;
+      animation: fall linear infinite;
+      filter: blur(0.4px);
+      opacity: 0.22;
+      image-rendering: auto;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-80px) rotate(0deg) scale(1);
+        opacity: 0.28;
+      }
+      70% {
+        opacity: 0.22;
+      }
+      100% {
+        transform: translateY(calc(100vh + 140px)) rotate(360deg) scale(1.15);
+        opacity: 0.06;
+      }
+    }
+
     .content {
       position: relative;
       z-index: 1;
@@ -180,6 +216,9 @@
         width: 6px;
         height: 6px;
       }
+      .falling-emojis img {
+        width: 28px;
+      }
     }
 
     ::-webkit-scrollbar {
@@ -192,6 +231,8 @@
   <div class="bg-lines">
     <canvas id="bgCanvas"></canvas>
   </div>
+  
+  <div class="falling-emojis" id="fallingEmojis"></div>
 
   <div class="content">
     <div class="server-name">
@@ -223,10 +264,10 @@
       const ctx = canvas.getContext('2d');
 
       let W, H;
-      const xbars = 17; 
-      const ybars = 30;  
+      const xbars = 17;
+      const ybars = 30;
       let animTime = 0;
-      const speed = 30; 
+      const speed = 30;
 
       function resize() {
         W = canvas.width = window.innerWidth;
@@ -278,6 +319,56 @@
       }
 
       setInterval(nextMessage, interval);
+
+      const emojiContainer = document.getElementById('fallingEmojis');
+
+      const EMOJI_FILES = [
+        '1.png',
+        '2.png',
+        '3.png',
+        '4.png',
+        '5.png',
+        '6.png'
+      ];
+
+      const EMOJI_PATH = 'emoji/';
+      const MAX_EMOJIS = 16;
+
+      function createEmoji() {
+        if (emojiContainer.children.length >= MAX_EMOJIS) return;
+
+        const img = document.createElement('img');
+        const file = EMOJI_FILES[Math.floor(Math.random() * EMOJI_FILES.length)];
+        img.src = EMOJI_PATH + file;
+        img.alt = '';
+
+        img.style.left = Math.random() * 100 + 'vw';
+
+        const duration = 8 + Math.random() * 10;
+        const delay = Math.random() * 10;
+        const size = 22 + Math.random() * 28;
+        const blurAmount = 0.4 + Math.random() * 1.0;
+
+        img.style.width = size + 'px';
+        img.style.animationDuration = duration + 's';
+        img.style.animationDelay = delay + 's';
+        img.style.filter = `blur(${blurAmount}px)`;
+        img.style.opacity = 0.18 + Math.random() * 0.14;
+
+        emojiContainer.appendChild(img);
+
+        const totalLifetime = (duration + delay) * 1000 + 800;
+        setTimeout(() => {
+          if (img.parentNode) img.remove();
+        }, totalLifetime);
+      }
+
+      for (let i = 0; i < 7; i++) {
+        createEmoji();
+      }
+
+      setInterval(createEmoji, 1200);
+
     })();
   </script>
 </body>
