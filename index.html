@@ -182,39 +182,6 @@
       }
     }
 
-    /* Кнопка управления музыкой */
-    .music-toggle {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(20, 20, 22, 0.7);
-      border: 1px solid rgba(200, 60, 60, 0.3);
-      color: #cc3333;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 10;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(6px);
-      font-size: 18px;
-      user-select: none;
-    }
-
-    .music-toggle:hover {
-      background: rgba(40, 20, 20, 0.8);
-      border-color: rgba(220, 60, 60, 0.6);
-      box-shadow: 0 0 20px rgba(200, 50, 50, 0.4);
-    }
-
-    .music-toggle.muted {
-      color: #555;
-      border-color: rgba(100, 100, 100, 0.3);
-    }
-
     @media (max-width: 1280px) {
       .server-name {
         font-size: 9rem;
@@ -291,8 +258,6 @@
     </div>
   </div>
 
-  <div class="music-toggle" id="musicToggle" title="Включить/выключить музыку">♪</div>
-
   <script>
     (function() {
       
@@ -306,17 +271,13 @@
       ];
 
       const MUSIC_PATH = 'music/';
-      const TARGET_VOLUME = 0.35;
+      const TARGET_VOLUME = 0.05;
       const FADE_IN_TIME = 4000;
       const FADE_OUT_TIME = 1500;
 
       let audio = null;
       let currentTrackIndex = 0;
       let fadeInterval = null;
-      let userMuted = false;
-      let audioReady = false;
-
-      const toggleBtn = document.getElementById('musicToggle');
 
       function createAudio() {
         if (audio) return;
@@ -375,13 +336,8 @@
         const playPromise = audio.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
-            audioReady = true;
-            if (!userMuted) {
-              fadeTo(TARGET_VOLUME, FADE_IN_TIME);
-              toggleBtn.classList.remove('muted');
-            }
+            fadeTo(TARGET_VOLUME, FADE_IN_TIME);
           }).catch((err) => {
-            audioReady = false;
             console.log('Ожидание взаимодействия пользователя для запуска музыки');
           });
         }
@@ -392,43 +348,17 @@
         playTrack(currentTrackIndex + 1);
       }
 
-      function toggleMute() {
-        if (!audio) {
-
-          playTrack(0);
-          userMuted = false;
-          return;
-        }
-
-        if (userMuted) {
-          userMuted = false;
-          toggleBtn.classList.remove('muted');
-          toggleBtn.textContent = '♪';
-          if (audio.paused) {
-            audio.play().then(() => {
-              fadeTo(TARGET_VOLUME, FADE_IN_TIME);
-            }).catch(() => {});
-          } else {
-            fadeTo(TARGET_VOLUME, 800);
-          }
-        } else {
-          userMuted = true;
-          toggleBtn.classList.add('muted');
-          toggleBtn.textContent = '✕';
-          fadeTo(0, FADE_OUT_TIME);
-        }
+      function startRandomTrack() {
+        if (!audio) createAudio();
+        const randomIndex = Math.floor(Math.random() * MUSIC_FILES.length);
+        playTrack(randomIndex);
       }
-
-      toggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleMute();
-      });
 
       function tryAutoplay() {
         if (!audio) {
           createAudio();
-          playTrack(0);
-        } else if (audio.paused && !userMuted) {
+          startRandomTrack();
+        } else if (audio.paused) {
           audio.play().then(() => {
             fadeTo(TARGET_VOLUME, FADE_IN_TIME);
           }).catch(() => {});
@@ -442,7 +372,9 @@
       });
 
       createAudio();
-      audio.src = MUSIC_PATH + MUSIC_FILES[0];
+      const initialIndex = Math.floor(Math.random() * MUSIC_FILES.length);
+      currentTrackIndex = initialIndex;
+      audio.src = MUSIC_PATH + MUSIC_FILES[initialIndex];
 
       const canvas = document.getElementById('bgCanvas');
       const ctx = canvas.getContext('2d');
