@@ -240,7 +240,7 @@
         ctx.fillStyle = '#0d0d0f';
         ctx.fillRect(0, 0, W, H);
 
-        ctx.strokeStyle = 'rgba(155, 0, 0, 0.08)';
+        ctx.strokeStyle = 'rgba(100, 20, 20, 0.12)';
         ctx.lineWidth = 1;
 
         for (let i = 1; i <= xbars + 1; i++) {
@@ -258,30 +258,6 @@
           ctx.lineTo(xPos, H);
           ctx.stroke();
         }
-
-        const gradL = ctx.createLinearGradient(0, 0, 30, 0);
-        gradL.addColorStop(0, 'rgba(80, 0, 0, 0.5)');
-        gradL.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = gradL;
-        ctx.fillRect(0, 0, 30, H);
-
-        const gradR = ctx.createLinearGradient(W, 0, W - 30, 0);
-        gradR.addColorStop(0, 'rgba(80, 0, 0, 0.5)');
-        gradR.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = gradR;
-        ctx.fillRect(W - 30, 0, 30, H);
-
-        const gradU = ctx.createLinearGradient(0, 0, 0, 30);
-        gradU.addColorStop(0, 'rgba(80, 0, 0, 0.5)');
-        gradU.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = gradU;
-        ctx.fillRect(0, 0, W, 30);
-
-        const gradD = ctx.createLinearGradient(0, H, 0, H - 30);
-        gradD.addColorStop(0, 'rgba(80, 0, 0, 0.5)');
-        gradD.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = gradD;
-        ctx.fillRect(0, H - 30, W, 30);
 
         requestAnimationFrame(draw);
       }
