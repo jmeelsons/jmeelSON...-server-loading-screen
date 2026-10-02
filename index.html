@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>J-CITY loading</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       background: #0d0d0f;
@@ -23,236 +19,120 @@
     }
 
     .bg-lines {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: #0d0d0f;
-      z-index: 0;
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: #0d0d0f; z-index: 0;
       pointer-events: none;
     }
-
-    .bg-lines canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
+    .bg-lines canvas { display: block; width: 100%; height: 100%; }
 
     .falling-emojis {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 1;
-      pointer-events: none;
-      overflow: hidden;
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 1; pointer-events: none; overflow: hidden;
     }
-
     .falling-emojis img {
-      position: absolute;
-      top: -80px;
-      user-select: none;
-      will-change: transform;
+      position: absolute; top: -80px;
+      user-select: none; will-change: transform;
       animation: fall linear infinite;
-      filter: blur(0.4px);
-      opacity: 0.22;
+      filter: blur(0.4px); opacity: 0.22;
       image-rendering: auto;
     }
-
     @keyframes fall {
-      0% {
-        transform: translateY(-80px) rotate(0deg) scale(1);
-        opacity: 0.28;
-      }
-      70% {
-        opacity: 0.22;
-      }
-      100% {
-        transform: translateY(calc(100vh + 140px)) rotate(360deg) scale(1.15);
-        opacity: 0.06;
-      }
+      0%   { transform: translateY(-80px) rotate(0deg) scale(1); opacity: 0.28; }
+      70%  { opacity: 0.22; }
+      100% { transform: translateY(calc(100vh + 140px)) rotate(360deg) scale(1.15); opacity: 0.06; }
     }
 
     .content {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      position: relative; z-index: 2;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
     }
 
     .server-name {
-      font-weight: 800;
-      font-size: 12rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+      font-weight: 800; font-size: 12rem;
+      letter-spacing: 0.06em; text-transform: uppercase;
       margin-bottom: 0.8rem;
       text-shadow: 0 0 60px rgba(155, 0, 0, 0.4), 0 2px 20px rgba(0, 0, 0, 0.7);
-      font-family: inherit;
-      text-align: center;
-      line-height: 1;
+      font-family: inherit; text-align: center; line-height: 1;
     }
-
-    .server-name .red {
-      color: rgba(220, 60, 60, 0.95);
-    }
-
-    .server-name .white {
-      color: #ffffff;
-    }
+    .server-name .red   { color: rgba(220, 60, 60, 0.95); }
+    .server-name .white { color: #ffffff; }
 
     .changing-messages {
-      position: relative;
-      height: 2.4rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      max-width: 600px;
-      padding: 0 1rem;
-      margin-top: 0.2rem;
+      position: relative; height: 2.4rem;
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; max-width: 600px;
+      padding: 0 1rem; margin-top: 0.2rem;
     }
-
     .message {
-      position: absolute;
-      left: 0;
-      right: 0;
-      text-align: center;
-      color: #b0b0b8;
-      font-size: 1.05rem;
-      letter-spacing: 0.12em;
-      font-weight: 300;
-      text-transform: uppercase;
-      opacity: 0;
-      transform: translateY(6px);
+      position: absolute; left: 0; right: 0;
+      text-align: center; color: #b0b0b8;
+      font-size: 1.05rem; letter-spacing: 0.12em;
+      font-weight: 300; text-transform: uppercase;
+      opacity: 0; transform: translateY(6px);
       transition: opacity 0.5s ease, transform 0.5s ease;
       pointer-events: none;
       text-shadow: 0 0 10px rgba(200, 60, 60, 0.15);
       white-space: nowrap;
     }
-
-    .message.active {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .message.active { opacity: 1; transform: translateY(0); }
 
     .message-line {
-      width: 120px;
-      height: 1px;
-      margin-top: 0.6rem;
+      width: 120px; height: 1px; margin-top: 0.6rem;
       background: linear-gradient(90deg, transparent, rgba(200, 60, 60, 0.4), transparent);
       opacity: 0.5;
     }
 
     .progress-wrap {
-      width: 320px;
-      max-width: 80vw;
+      width: 320px; max-width: 80vw;
       margin-top: 1.6rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
+      display: flex; flex-direction: column; gap: 0.45rem;
     }
-
     .progress-info {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: #8a8a92;
-      font-weight: 300;
+      display: flex; align-items: baseline; justify-content: space-between;
+      font-size: 0.72rem; letter-spacing: 0.14em;
+      text-transform: uppercase; color: #8a8a92; font-weight: 300;
     }
-
     .progress-percent {
       color: rgba(220, 60, 60, 0.95);
       font-weight: 600;
       font-variant-numeric: tabular-nums;
-      min-width: 3.2em;
-      text-align: left;
+      min-width: 3.2em; text-align: left;
     }
-
     .progress-file {
-      flex: 1;
-      text-align: right;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: #6f6f78;
-      font-size: 0.66rem;
-      letter-spacing: 0.08em;
+      flex: 1; text-align: right;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: #6f6f78; font-size: 0.66rem; letter-spacing: 0.08em;
     }
-
     .progress-track {
-      position: relative;
-      width: 100%;
-      height: 2px;
+      position: relative; width: 100%; height: 2px;
       background: rgba(255, 255, 255, 0.06);
-      border-radius: 2px;
-      overflow: hidden;
+      border-radius: 2px; overflow: hidden;
     }
-
     .progress-fill {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 0%;
+      position: absolute; top: 0; left: 0;
+      height: 100%; width: 0%;
       background: linear-gradient(90deg, rgba(160, 30, 30, 0.9), rgba(220, 60, 60, 1));
       box-shadow: 0 0 10px rgba(220, 60, 60, 0.5);
       border-radius: 2px;
       transition: width 0.35s ease;
     }
 
-    @media (max-width: 1280px) {
-      .server-name {
-        font-size: 9rem;
-      }
+    @media (max-width: 1280px) { .server-name { font-size: 9rem; } }
+    @media (max-width: 1024px) { .server-name { font-size: 7rem; } }
+    @media (max-width: 768px)  { .server-name { font-size: 5rem; } }
+    @media (max-width: 480px)  {
+      .server-name { font-size: 3.2rem; margin-bottom: 0.6rem; }
+      .changing-messages { height: 2rem; }
+      .message { font-size: 0.85rem; letter-spacing: 0.08em; }
+      .falling-emojis img { width: 28px; }
+      .progress-wrap { width: 240px; margin-top: 1.2rem; }
+      .progress-file { font-size: 0.6rem; }
     }
 
-    @media (max-width: 1024px) {
-      .server-name {
-        font-size: 7rem;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .server-name {
-        font-size: 5rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .server-name {
-        font-size: 3.2rem;
-        margin-bottom: 0.6rem;
-      }
-      .changing-messages {
-        height: 2rem;
-      }
-      .message {
-        font-size: 0.85rem;
-        letter-spacing: 0.08em;
-      }
-      .falling-emojis img {
-        width: 28px;
-      }
-      .progress-wrap {
-        width: 240px;
-        margin-top: 1.2rem;
-      }
-      .progress-file {
-        font-size: 0.6rem;
-      }
-    }
-
-    ::-webkit-scrollbar {
-      width: 0;
-      height: 0;
-    }
+    ::-webkit-scrollbar { width: 0; height: 0; }
   </style>
 
   <script src="jquery-3.4.1.min.js"></script>
@@ -263,7 +143,7 @@
   <div class="bg-lines">
     <canvas id="bgCanvas"></canvas>
   </div>
-  
+
   <div class="falling-emojis" id="fallingEmojis"></div>
 
   <div class="content">
@@ -291,7 +171,7 @@
     <div class="progress-wrap">
       <div class="progress-info">
         <span class="progress-percent" id="progressPercent">0%</span>
-        <span class="progress-file" id="progressFile">wait...</span>
+        <span class="progress-file" id="progressFile">initializing...</span>
       </div>
       <div class="progress-track">
         <div class="progress-fill" id="progressFill"></div>
@@ -301,15 +181,125 @@
 
   <script>
     (function() {
-      const MUSIC_FILES = [
-        'track1.mp3',
-        'track2.mp3',
-        'track3.mp3',
-        'track4.mp3',
-        'track5.mp3',
-        'track6.mp3'        
-      ];
+      const progressFill    = document.getElementById('progressFill');
+      const progressPercent = document.getElementById('progressPercent');
+      const progressFile    = document.getElementById('progressFile');
 
+      let currentProgress = 0;
+      let targetProgress  = 0;
+      let smoothInterval  = null;
+
+      function smoothProgress() {
+        if (smoothInterval) return;
+        smoothInterval = setInterval(() => {
+          if (Math.abs(currentProgress - targetProgress) < 0.1) {
+            currentProgress = targetProgress;
+            progressFill.style.width = currentProgress + '%';
+            progressPercent.textContent = Math.round(currentProgress) + '%';
+            clearInterval(smoothInterval);
+            smoothInterval = null;
+            return;
+          }
+          currentProgress += (targetProgress - currentProgress) * 0.15;
+          progressFill.style.width = currentProgress + '%';
+          progressPercent.textContent = Math.round(currentProgress) + '%';
+        }, 30);
+      }
+
+      window.setLoad = function(percentage) {
+        const p = Math.max(0, Math.min(100, Number(percentage) || 0));
+        if (p > targetProgress) {
+          targetProgress = p;
+          smoothProgress();
+        }
+      };
+
+      window.setLoad = window.setLoad;
+
+      const origDownloadingFile = window.DownloadingFile;
+      window.DownloadingFile = function(filename) {
+        if (typeof origDownloadingFile === 'function') {
+          try { origDownloadingFile(filename); } catch(e) {}
+        }
+        if (progressFile && filename) {
+          progressFile.textContent = filename.length > 34
+            ? filename.slice(0, 31) + '...'
+            : filename;
+        }
+      };
+
+      const origSetStatusChanged = window.SetStatusChanged;
+      window.SetStatusChanged = function(status) {
+        if (typeof origSetStatusChanged === 'function') {
+          try { origSetStatusChanged(status); } catch(e) {}
+        }
+        if (progressFile && status) {
+          progressFile.textContent = status;
+        }
+        if (status === 'Workshop Complete') window.setLoad(80);
+        else if (status === 'Client info sent!') window.setLoad(95);
+        else if (status === 'Starting Lua...')   window.setLoad(100);
+      };
+
+      const origSetFilesTotal = window.SetFilesTotal;
+      window.SetFilesTotal = function(total) {
+        if (typeof origSetFilesTotal === 'function') {
+          try { origSetFilesTotal(total); } catch(e) {}
+        }
+        window._totalFiles = total;
+        if (progressFile) progressFile.textContent = 'files: ' + total;
+      };
+
+      const origSetFilesNeeded = window.SetFilesNeeded;
+      window.SetFilesNeeded = function(needed) {
+        if (typeof origSetFilesNeeded === 'function') {
+          try { origSetFilesNeeded(needed); } catch(e) {}
+        }
+        if (window._totalFiles && window._totalFiles > 0) {
+          const p = 100 - Math.round((needed / window._totalFiles) * 100);
+          window.setLoad(p);
+        }
+      };
+
+      const origGameDetails = window.GameDetails;
+      window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
+        if (typeof origGameDetails === 'function') {
+          try { origGameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode); } catch(e) {}
+        }
+        window.setLoad(1);
+        if (progressFile) progressFile.textContent = 'connecting...';
+      };
+
+      let fallbackActive = true;
+      let fallbackProgress = 0;
+
+      const fallbackCheck = setInterval(() => {
+        if (window._totalFiles && window._totalFiles > 0) {
+          fallbackActive = false;
+          clearInterval(fallbackCheck);
+        }
+      }, 500);
+
+      const fallbackInterval = setInterval(() => {
+        if (!fallbackActive) {
+          clearInterval(fallbackInterval);
+          return;
+        }
+        if (fallbackProgress < 85) {
+          fallbackProgress += Math.random() * 1.5 + 0.3;
+          if (fallbackProgress > 85) fallbackProgress = 85;
+          window.setLoad(fallbackProgress);
+        }
+      }, 400);
+
+      setTimeout(() => {
+        if (targetProgress < 1) {
+          window.setLoad(1);
+          if (progressFile) progressFile.textContent = 'loading...';
+        }
+      }, 3000);
+
+      const MUSIC_FILES = ['track1.mp3','track2.mp3','track3.mp3','track4.mp3','track5.mp3','track6.mp3'];
       const MUSIC_PATH = 'music/';
       const TARGET_VOLUME = 0.05;
       const FADE_IN_TIME = 4000;
@@ -324,37 +314,26 @@
         audio.loop = false;
         audio.volume = 0;
         audio.preload = 'auto';
-
-        audio.addEventListener('ended', () => {
-          nextTrack();
-        });
-
-        audio.addEventListener('error', () => {
-          console.warn('fucking fail:', audio.src);
-          setTimeout(nextTrack, 1000);
-        });
+        audio.addEventListener('ended', () => nextTrack());
+        audio.addEventListener('error', () => { setTimeout(nextTrack, 1000); });
       }
 
       function fadeTo(targetVolume, duration, callback) {
         if (!audio) return;
         if (fadeInterval) clearInterval(fadeInterval);
-
         const startVolume = audio.volume;
         const startTime = performance.now();
         const diff = targetVolume - startVolume;
-
         if (Math.abs(diff) < 0.001) {
           audio.volume = targetVolume;
           if (callback) callback();
           return;
         }
-
         fadeInterval = setInterval(() => {
           const elapsed = performance.now() - startTime;
           const progress = Math.min(elapsed / duration, 1);
           const eased = 1 - Math.pow(1 - progress, 3);
           audio.volume = Math.max(0, Math.min(1, startVolume + diff * eased));
-
           if (progress >= 1) {
             clearInterval(fadeInterval);
             fadeInterval = null;
@@ -367,270 +346,103 @@
       function playTrack(index) {
         if (!audio) createAudio();
         currentTrackIndex = ((index % MUSIC_FILES.length) + MUSIC_FILES.length) % MUSIC_FILES.length;
-        const file = MUSIC_FILES[currentTrackIndex];
-
-        audio.src = MUSIC_PATH + file;
+        audio.src = MUSIC_PATH + MUSIC_FILES[currentTrackIndex];
         audio.volume = 0;
-
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            fadeTo(TARGET_VOLUME, FADE_IN_TIME);
-          }).catch((err) => {
-            console.log('waiting.....');
-          });
+        const p = audio.play();
+        if (p !== undefined) {
+          p.then(() => fadeTo(TARGET_VOLUME, FADE_IN_TIME)).catch(() => {});
         }
       }
 
-      function nextTrack() {
-        if (!audio) return;
-        playTrack(currentTrackIndex + 1);
-      }
-
-      function startRandomTrack() {
-        if (!audio) createAudio();
-        const randomIndex = Math.floor(Math.random() * MUSIC_FILES.length);
-        playTrack(randomIndex);
-      }
-
+      function nextTrack() { if (audio) playTrack(currentTrackIndex + 1); }
+      function startRandomTrack() { if (!audio) createAudio(); playTrack(Math.floor(Math.random() * MUSIC_FILES.length)); }
       function tryAutoplay() {
-        if (!audio) {
-          createAudio();
-          startRandomTrack();
-        } else if (audio.paused) {
-          audio.play().then(() => {
-            fadeTo(TARGET_VOLUME, FADE_IN_TIME);
-          }).catch(() => {});
+        if (!audio) { createAudio(); startRandomTrack(); }
+        else if (audio.paused) {
+          audio.play().then(() => fadeTo(TARGET_VOLUME, FADE_IN_TIME)).catch(() => {});
         }
       }
 
-      ['click', 'touchstart', 'keydown', 'mousemove', 'scroll'].forEach(ev => {
+      ['click','touchstart','keydown','mousemove','scroll'].forEach(ev => {
         window.addEventListener(ev, function onFirstInteract() {
           tryAutoplay();
         }, { passive: true });
       });
 
       createAudio();
-      const initialIndex = Math.floor(Math.random() * MUSIC_FILES.length);
-      currentTrackIndex = initialIndex;
-      audio.src = MUSIC_PATH + MUSIC_FILES[initialIndex];
+      currentTrackIndex = Math.floor(Math.random() * MUSIC_FILES.length);
+      audio.src = MUSIC_PATH + MUSIC_FILES[currentTrackIndex];
 
       const canvas = document.getElementById('bgCanvas');
       const ctx = canvas.getContext('2d');
-
       let W, H;
-      const xbars = 17;
-      const ybars = 30;
+      const xbars = 17, ybars = 30;
       let animTime = 0;
       const speed = 30;
 
-      function resize() {
-        W = canvas.width = window.innerWidth;
-        H = canvas.height = window.innerHeight;
-      }
-
+      function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
       function draw() {
         animTime += 0.016;
-
         ctx.clearRect(0, 0, W, H);
         ctx.fillStyle = '#0d0d0f';
         ctx.fillRect(0, 0, W, H);
-
         ctx.strokeStyle = 'rgba(100, 20, 20, 0.12)';
         ctx.lineWidth = 1;
-
         for (let i = 1; i <= xbars + 1; i++) {
-          let yPos = (H / xbars) * (i - 1) + (animTime * speed % (H / xbars));
-          ctx.beginPath();
-          ctx.moveTo(0, yPos);
-          ctx.lineTo(W, yPos);
-          ctx.stroke();
+          const yPos = (H / xbars) * (i - 1) + (animTime * speed % (H / xbars));
+          ctx.beginPath(); ctx.moveTo(0, yPos); ctx.lineTo(W, yPos); ctx.stroke();
         }
-
         for (let i = 1; i <= ybars + 1; i++) {
-          let xPos = (W / ybars) * i - (animTime * speed % (W / ybars));
-          ctx.beginPath();
-          ctx.moveTo(xPos, 0);
-          ctx.lineTo(xPos, H);
-          ctx.stroke();
+          const xPos = (W / ybars) * i - (animTime * speed % (W / ybars));
+          ctx.beginPath(); ctx.moveTo(xPos, 0); ctx.lineTo(xPos, H); ctx.stroke();
         }
-
         requestAnimationFrame(draw);
       }
-
       window.addEventListener('resize', resize);
-      resize();
-      draw();
+      resize(); draw();
 
       const messages = document.querySelectorAll('.message');
       const totalMessages = messages.length;
-      let currentIndex = 0;
-      const interval = 6001;
-
+      let currentMessageIndex = 0;
       function getRandomDifferentIndex() {
         if (totalMessages <= 1) return 0;
-        let newIndex;
-        do {
-          newIndex = Math.floor(Math.random() * totalMessages);
-        } while (newIndex === currentIndex);
-        return newIndex;
+        let n;
+        do { n = Math.floor(Math.random() * totalMessages); } while (n === currentMessageIndex);
+        return n;
       }
-
       function nextMessage() {
-        messages[currentIndex].classList.remove('active');
-        currentIndex = getRandomDifferentIndex();
-        messages[currentIndex].classList.add('active');
+        messages[currentMessageIndex].classList.remove('active');
+        currentMessageIndex = getRandomDifferentIndex();
+        messages[currentMessageIndex].classList.add('active');
       }
-
-      setInterval(nextMessage, interval);
+      setInterval(nextMessage, 6001);
 
       const emojiContainer = document.getElementById('fallingEmojis');
-
-      const EMOJI_FILES = [
-        '1.png',
-        '2.png',
-        '3.png',
-        '4.png',
-        '5.png',
-        '6.png'
-      ];
-
+      const EMOJI_FILES = ['1.png','2.png','3.png','4.png','5.png','6.png'];
       const EMOJI_PATH = 'emoji/';
       const MAX_EMOJIS = 16;
 
       function createEmoji() {
         if (emojiContainer.children.length >= MAX_EMOJIS) return;
-
         const img = document.createElement('img');
-        const file = EMOJI_FILES[Math.floor(Math.random() * EMOJI_FILES.length)];
-        img.src = EMOJI_PATH + file;
+        img.src = EMOJI_PATH + EMOJI_FILES[Math.floor(Math.random() * EMOJI_FILES.length)];
         img.alt = '';
-
         img.style.left = Math.random() * 100 + 'vw';
-
         const duration = 8 + Math.random() * 10;
         const delay = Math.random() * 10;
         const size = 22 + Math.random() * 28;
         const blurAmount = 0.4 + Math.random() * 1.0;
-
         img.style.width = size + 'px';
         img.style.animationDuration = duration + 's';
         img.style.animationDelay = delay + 's';
         img.style.filter = `blur(${blurAmount}px)`;
         img.style.opacity = 0.18 + Math.random() * 0.14;
-
         emojiContainer.appendChild(img);
-
         const totalLifetime = (duration + delay) * 1000 + 800;
-        setTimeout(() => {
-          if (img.parentNode) img.remove();
-        }, totalLifetime);
+        setTimeout(() => { if (img.parentNode) img.remove(); }, totalLifetime);
       }
-
-      for (let i = 0; i < 7; i++) {
-        createEmoji();
-      }
-
+      for (let i = 0; i < 7; i++) createEmoji();
       setInterval(createEmoji, 1200);
-
-      const progressFill = document.getElementById('progressFill');
-      const progressPercent = document.getElementById('progressPercent');
-      const progressFile = document.getElementById('progressFile');
-
-      let currentPercentage = 0;
-      let totalFilesCount = 0;
-      let neededFilesCount = 0;
-      let lastStatus = '';
-
-      function updateProgressUI(percent, label) {
-        const p = Math.max(0, Math.min(100, percent));
-        progressFill.style.width = p + '%';
-        progressPercent.textContent = Math.round(p) + '%';
-        if (label !== undefined && label !== null && label !== '') {
-          progressFile.textContent = label;
-        }
-      }
-
-      const originalSetFilesTotal = window.SetFilesTotal;
-      window.SetFilesTotal = function(total) {
-        totalFilesCount = total;
-        if (typeof originalSetFilesTotal === 'function') {
-          originalSetFilesTotal(total);
-        }
-        updateProgressUI(0, 'files: 0 / ' + total);
-      };
-
-      const originalSetFilesNeeded = window.SetFilesNeeded;
-      window.SetFilesNeeded = function(needed) {
-        neededFilesCount = needed;
-        if (typeof originalSetFilesNeeded === 'function') {
-          originalSetFilesNeeded(needed);
-        }
-        if (totalFilesCount > 0) {
-          const loaded = totalFilesCount - needed;
-          const percent = Math.round((loaded / totalFilesCount) * 100);
-          currentPercentage = percent;
-          updateProgressUI(percent, 'files: ' + loaded + ' / ' + totalFilesCount);
-        }
-      };
-
-      const originalDownloadingFile = window.DownloadingFile;
-      window.DownloadingFile = function(filename) {
-        if (typeof originalDownloadingFile === 'function') {
-          originalDownloadingFile(filename);
-        }
-        const shortName = filename.length > 34 ? filename.slice(0, 31) + '...' : filename;
-        updateProgressUI(currentPercentage, shortName);
-      };
-
-      const originalSetStatusChanged = window.SetStatusChanged;
-      window.SetStatusChanged = function(status) {
-        lastStatus = status;
-        if (typeof originalSetStatusChanged === 'function') {
-          originalSetStatusChanged(status);
-        }
-
-        updateProgressUI(currentPercentage, status);
-
-        if (status === 'Workshop Complete') {
-          currentPercentage = Math.max(currentPercentage, 80);
-          updateProgressUI(currentPercentage, status);
-        } else if (status === 'Client info sent!') {
-          currentPercentage = Math.max(currentPercentage, 95);
-          updateProgressUI(currentPercentage, status);
-        } else if (status === 'Starting Lua...') {
-          currentPercentage = 100;
-          updateProgressUI(100, status);
-        }
-      };
-
-      window.setLoad = function(percentage) {
-        currentPercentage = percentage;
-        updateProgressUI(percentage);
-      };
-
-      const originalGameDetails = window.GameDetails;
-      window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
-        if (typeof originalGameDetails === 'function') {
-          originalGameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode);
-        }
-        updateProgressUI(0, 'initializing...');
-      };
-
-      if (typeof window.percentage !== 'undefined' && window.percentage > 0) {
-        currentPercentage = window.percentage;
-        updateProgressUI(currentPercentage);
-      }
-
-      setTimeout(() => {
-        if (currentPercentage === 0 && totalFilesCount > 0) {
-          const loaded = totalFilesCount - neededFilesCount;
-          const percent = Math.round((loaded / totalFilesCount) * 100);
-          currentPercentage = percent;
-          updateProgressUI(percent, 'files: ' + loaded + ' / ' + totalFilesCount);
-        }
-      }, 100);
-
     })();
   </script>
 </body>
