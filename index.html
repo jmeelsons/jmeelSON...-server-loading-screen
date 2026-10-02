@@ -313,7 +313,6 @@
       const MUSIC_PATH = 'music/';
       const TARGET_VOLUME = 0.05;
       const FADE_IN_TIME = 4000;
-      const FADE_OUT_TIME = 1500;
 
       let audio = null;
       let currentTrackIndex = 0;
@@ -538,10 +537,41 @@
       const progressPercent = document.getElementById('progressPercent');
       const progressFile = document.getElementById('progressFile');
 
-      window.setLoad = function(percentage) {
-        const p = Math.max(0, Math.min(100, percentage));
+      let currentPercentage = 0;
+      let totalFilesCount = 0;
+      let neededFilesCount = 0;
+      let lastStatus = '';
+
+      function updateProgressUI(percent, label) {
+        const p = Math.max(0, Math.min(100, percent));
         progressFill.style.width = p + '%';
         progressPercent.textContent = Math.round(p) + '%';
+        if (label !== undefined && label !== null && label !== '') {
+          progressFile.textContent = label;
+        }
+      }
+
+      const originalSetFilesTotal = window.SetFilesTotal;
+      window.SetFilesTotal = function(total) {
+        totalFilesCount = total;
+        if (typeof originalSetFilesTotal === 'function') {
+          originalSetFilesTotal(total);
+        }
+        updateProgressUI(0, 'files: 0 / ' + total);
+      };
+
+      const originalSetFilesNeeded = window.SetFilesNeeded;
+      window.SetFilesNeeded = function(needed) {
+        neededFilesCount = needed;
+        if (typeof originalSetFilesNeeded === 'function') {
+          originalSetFilesNeeded(needed);
+        }
+        if (totalFilesCount > 0) {
+          const loaded = totalFilesCount - needed;
+          const percent = Math.round((loaded / totalFilesCount) * 100);
+          currentPercentage = percent;
+          updateProgressUI(percent, 'files: ' + loaded + ' / ' + totalFilesCount);
+        }
       };
 
       const originalDownloadingFile = window.DownloadingFile;
@@ -549,35 +579,58 @@
         if (typeof originalDownloadingFile === 'function') {
           originalDownloadingFile(filename);
         }
-        if (progressFile) {
-          progressFile.textContent = filename.length > 32 ? filename.slice(0, 29) + '...' : filename;
-        }
+        const shortName = filename.length > 34 ? filename.slice(0, 31) + '...' : filename;
+        updateProgressUI(currentPercentage, shortName);
       };
 
       const originalSetStatusChanged = window.SetStatusChanged;
       window.SetStatusChanged = function(status) {
+        lastStatus = status;
         if (typeof originalSetStatusChanged === 'function') {
           originalSetStatusChanged(status);
         }
-        if (progressFile) {
-          progressFile.textContent = status;
+
+        updateProgressUI(currentPercentage, status);
+
+        if (status === 'Workshop Complete') {
+          currentPercentage = Math.max(currentPercentage, 80);
+          updateProgressUI(currentPercentage, status);
+        } else if (status === 'Client info sent!') {
+          currentPercentage = Math.max(currentPercentage, 95);
+          updateProgressUI(currentPercentage, status);
+        } else if (status === 'Starting Lua...') {
+          currentPercentage = 100;
+          updateProgressUI(100, status);
         }
       };
 
-      if (typeof window.percentage !== 'undefined') {
-        window.setLoad(window.percentage);
-      }
+      window.setLoad = function(percentage) {
+        currentPercentage = percentage;
+        updateProgressUI(percentage);
+      };
 
       const originalGameDetails = window.GameDetails;
       window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
         if (typeof originalGameDetails === 'function') {
           originalGameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode);
         }
-        window.setLoad(0);
+        updateProgressUI(0, 'initializing...');
       };
 
-      if (typeof window.isGmod !== 'undefined' && !window.isGmod) {
+      if (typeof window.percentage !== 'undefined' && window.percentage > 0) {
+        currentPercentage = window.percentage;
+        updateProgressUI(currentPercentage);
       }
+
+      setTimeout(() => {
+        if (currentPercentage === 0 && totalFilesCount > 0) {
+          const loaded = totalFilesCount - neededFilesCount;
+          const percent = Math.round((loaded / totalFilesCount) * 100);
+          currentPercentage = percent;
+          updateProgressUI(percent, 'files: ' + loaded + ' / ' + totalFilesCount);
+        }
+      }, 100);
+
     })();
   </script>
 </body>
