@@ -207,6 +207,11 @@
       transition: width 0.35s ease;
     }
 
+    /* Скрытые элементы, которые использует main.js */
+    #title, #map, #steamid, #history, #announcement, #debug {
+      display: none;
+    }
+
     @media (max-width: 1280px) {
       .server-name {
         font-size: 9rem;
@@ -298,6 +303,13 @@
       </div>
     </div>
   </div>
+
+  <div id="title"></div>
+  <div id="map"></div>
+  <div id="steamid"></div>
+  <div id="history"></div>
+  <div id="announcement"></div>
+  <div id="debug"></div>
 
   <script>
     (function() {
