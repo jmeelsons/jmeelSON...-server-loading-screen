@@ -214,8 +214,6 @@
         }
       };
 
-      window.setLoad = window.setLoad;
-
       const origDownloadingFile = window.DownloadingFile;
       window.DownloadingFile = function(filename) {
         if (typeof origDownloadingFile === 'function') {
@@ -307,6 +305,7 @@
       let audio = null;
       let currentTrackIndex = 0;
       let fadeInterval = null;
+      let musicStarted = false;
 
       function createAudio() {
         if (audio) return;
@@ -350,28 +349,56 @@
         audio.volume = 0;
         const p = audio.play();
         if (p !== undefined) {
-          p.then(() => fadeTo(TARGET_VOLUME, FADE_IN_TIME)).catch(() => {});
+          p.then(() => {
+            musicStarted = true;
+            fadeTo(TARGET_VOLUME, FADE_IN_TIME);
+          }).catch(() => {
+            musicStarted = false;
+          });
         }
       }
 
       function nextTrack() { if (audio) playTrack(currentTrackIndex + 1); }
-      function startRandomTrack() { if (!audio) createAudio(); playTrack(Math.floor(Math.random() * MUSIC_FILES.length)); }
-      function tryAutoplay() {
-        if (!audio) { createAudio(); startRandomTrack(); }
-        else if (audio.paused) {
-          audio.play().then(() => fadeTo(TARGET_VOLUME, FADE_IN_TIME)).catch(() => {});
+
+      function tryStartImmediately() {
+        if (!audio) createAudio();
+        currentTrackIndex = Math.floor(Math.random() * MUSIC_FILES.length);
+        audio.src = MUSIC_PATH + MUSIC_FILES[currentTrackIndex];
+
+        const p = audio.play();
+        if (p !== undefined) {
+          p.then(() => {
+            musicStarted = true;
+            fadeTo(TARGET_VOLUME, FADE_IN_TIME);
+          }).catch(() => {
+            musicStarted = false;
+          });
         }
       }
 
-      ['click','touchstart','keydown','mousemove','scroll'].forEach(ev => {
-        window.addEventListener(ev, function onFirstInteract() {
-          tryAutoplay();
-        }, { passive: true });
+      function startOnInteraction() {
+        if (musicStarted) return;
+        if (!audio) createAudio();
+
+        if (!audio.src) {
+          currentTrackIndex = Math.floor(Math.random() * MUSIC_FILES.length);
+          audio.src = MUSIC_PATH + MUSIC_FILES[currentTrackIndex];
+        }
+
+        const p = audio.play();
+        if (p !== undefined) {
+          p.then(() => {
+            musicStarted = true;
+            fadeTo(TARGET_VOLUME, FADE_IN_TIME);
+          }).catch(() => {});
+        }
+      }
+
+      ['click', 'touchstart', 'keydown'].forEach(ev => {
+        window.addEventListener(ev, startOnInteraction, { once: false, passive: true });
       });
 
-      createAudio();
-      currentTrackIndex = Math.floor(Math.random() * MUSIC_FILES.length);
-      audio.src = MUSIC_PATH + MUSIC_FILES[currentTrackIndex];
+      tryStartImmediately();
 
       const canvas = document.getElementById('bgCanvas');
       const ctx = canvas.getContext('2d');
@@ -443,6 +470,7 @@
       }
       for (let i = 0; i < 7; i++) createEmoji();
       setInterval(createEmoji, 1200);
+
     })();
   </script>
 </body>
