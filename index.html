@@ -120,6 +120,25 @@
       transition: width 0.35s ease;
     }
 
+    .discord-footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.9rem 1rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #5a5a62;
+      font-weight: 300;
+      pointer-events: none;
+      user-select: none;
+      opacity: 0.7;
+      text-shadow: 0 0 10px rgba(200, 60, 60, 0.1);
+    }
+
     @media (max-width: 1280px) { .server-name { font-size: 9rem; } }
     @media (max-width: 1024px) { .server-name { font-size: 7rem; } }
     @media (max-width: 768px)  { .server-name { font-size: 5rem; } }
@@ -130,6 +149,7 @@
       .falling-emojis img { width: 28px; }
       .progress-wrap { width: 240px; margin-top: 1.2rem; }
       .progress-file { font-size: 0.6rem; }
+      .discord-footer { font-size: 0.62rem; letter-spacing: 0.14em; padding: 0.7rem 0.6rem; }
     }
 
     ::-webkit-scrollbar { width: 0; height: 0; }
@@ -177,6 +197,10 @@
         <div class="progress-fill" id="progressFill"></div>
       </div>
     </div>
+  </div>
+
+  <div class="discord-footer">
+    discord.gg/ab4b8Ue7qe
   </div>
 
   <script>
