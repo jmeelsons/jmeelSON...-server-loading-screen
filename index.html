@@ -481,7 +481,7 @@
       setInterval(nextMessage, 6001);
 
       const emojiContainer = document.getElementById('fallingEmojis');
-      const EMOJI_FILES = ['1.png','2.png','3.png','4.png','5.png','6.png'];
+      const EMOJI_FILES = Array.from({length: 100}, (_, i) => String(i + 1).padStart(3, '0') + '.png');
       const EMOJI_PATH = 'emoji/';
       const MAX_EMOJIS = 16;
 
