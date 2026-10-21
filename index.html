@@ -52,24 +52,6 @@
       pointer-events: none;
     }
 
-    .falling-emojis {
-      position: fixed; top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      z-index: 1; pointer-events: none; overflow: hidden;
-    }
-    .falling-emojis img {
-      position: absolute; top: -80px;
-      user-select: none; will-change: transform;
-      animation: fall linear infinite;
-      filter: blur(0.2px); opacity: 0.45;
-      image-rendering: auto;
-    }
-    @keyframes fall {
-      0%   { transform: translateY(-80px) rotate(0deg) scale(1); opacity: 0.55; }
-      70%  { opacity: 0.42; }
-      100% { transform: translateY(calc(100vh + 140px)) rotate(360deg) scale(1.15); opacity: 0.12; }
-    }
-
     .now-playing {
       position: fixed;
       top: 18px;
@@ -186,7 +168,6 @@
     @media (max-width: 480px)  {
       .content { padding: 0 0 1.4rem 1.2rem; }
       .server-name { font-size: 2.2rem; margin-bottom: 0.5rem; }
-      .falling-emojis img { width: 28px; }
       .progress-wrap { width: 240px; }
       .progress-file { font-size: 0.6rem; }
       .now-playing { top: 10px; font-size: 0.62rem; padding: 0.35rem 0.8rem 0.35rem 0.65rem; }
@@ -203,8 +184,6 @@
 </head>
 <body>
   <div class="bg-slideshow" id="bgSlideshow"></div>
-
-  <div class="falling-emojis" id="fallingEmojis"></div>
 
   <div class="now-playing" id="nowPlaying">
     <span class="np-icon"></span>
@@ -593,33 +572,6 @@
       }
 
       tryStartImmediately();
-
-      const emojiContainer = document.getElementById('fallingEmojis');
-      const EMOJI_FILES = Array.from({length: 100}, (_, i) => String(i + 1).padStart(3, '0') + '.png');
-      const EMOJI_PATH = 'emoji/';
-      const MAX_EMOJIS = 24;
-
-      function createEmoji() {
-        if (emojiContainer.children.length >= MAX_EMOJIS) return;
-        const img = document.createElement('img');
-        img.src = EMOJI_PATH + EMOJI_FILES[Math.floor(Math.random() * EMOJI_FILES.length)];
-        img.alt = '';
-        img.style.left = Math.random() * 100 + 'vw';
-        const duration = 8 + Math.random() * 10;
-        const delay = Math.random() * 10;
-        const size = 22 + Math.random() * 28;
-        const blurAmount = 0.2 + Math.random() * 0.5;
-        img.style.width = size + 'px';
-        img.style.animationDuration = duration + 's';
-        img.style.animationDelay = delay + 's';
-        img.style.filter = `blur(${blurAmount}px)`;
-        img.style.opacity = 0.35 + Math.random() * 0.2;
-        emojiContainer.appendChild(img);
-        const totalLifetime = (duration + delay) * 1000 + 800;
-        setTimeout(() => { if (img.parentNode) img.remove(); }, totalLifetime);
-      }
-      for (let i = 0; i < 10; i++) createEmoji();
-      setInterval(createEmoji, 800);
 
     })();
   </script>
