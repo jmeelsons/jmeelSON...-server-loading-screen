@@ -31,19 +31,18 @@
       background-size: cover;
       background-position: center;
       opacity: 0;
-      transform: translateX(100%) scale(1.05);
-      transition: opacity 1.2s ease, transform 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transform: scale(1.12);
+      transition: opacity 1.6s ease;
       will-change: opacity, transform;
     }
     .bg-slide.active {
       opacity: 1;
-      transform: translateX(0) scale(1.05);
+      animation: kenburns 9s ease-out forwards;
     }
-    .bg-slide.leaving {
-      opacity: 0;
-      transform: translateX(-8%) scale(1.02);
+    @keyframes kenburns {
+      0%   { transform: scale(1.12) translate(0, 0); }
+      100% { transform: scale(1.22) translate(-1.5%, -1%); }
     }
-
     .bg-slideshow::after {
       content: '';
       position: absolute; inset: 0;
@@ -129,12 +128,48 @@
     .server-name .red   { color: rgba(255, 0, 0, 255); }
     .server-name .white { color: #ffffff; }
 
+    .progress-wrap {
+      width: 320px; max-width: 80vw;
+      display: flex; flex-direction: column; gap: 0.45rem;
+    }
+    .progress-info {
+      display: flex; align-items: baseline; justify-content: space-between;
+      font-size: 0.72rem; letter-spacing: 0.14em;
+      text-transform: uppercase; color: #b8b8c0; font-weight: 300;
+    }
+    .progress-percent {
+      color: rgba(220, 60, 60, 0.95);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      min-width: 3.2em; text-align: left;
+    }
+    .progress-file {
+      flex: 1; text-align: right;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: #9a9aa2; font-size: 0.66rem; letter-spacing: 0.08em;
+    }
+    .progress-track {
+      position: relative; width: 100%; height: 2px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 2px; overflow: hidden;
+    }
+    .progress-fill {
+      position: absolute; top: 0; left: 0;
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, rgba(160, 30, 30, 0.9), rgba(220, 60, 60, 1));
+      box-shadow: 0 0 10px rgba(220, 60, 60, 0.5);
+      border-radius: 2px;
+      transition: width 0.35s ease;
+    }
+
     @media (max-width: 1280px) { .server-name { font-size: 4.6rem; } }
     @media (max-width: 1024px) { .server-name { font-size: 3.8rem; } }
     @media (max-width: 768px)  { .server-name { font-size: 3rem; } }
     @media (max-width: 480px)  {
       .content { padding: 0 0 1.4rem 1.2rem; }
       .server-name { font-size: 2.2rem; margin-bottom: 0.5rem; }
+      .progress-wrap { width: 240px; }
+      .progress-file { font-size: 0.6rem; }
       .now-playing { top: 10px; font-size: 0.62rem; padding: 0.35rem 0.8rem 0.35rem 0.65rem; }
       .now-playing .np-label { font-size: 0.55rem; }
       .now-playing .np-track { max-width: 40vw; }
@@ -160,19 +195,139 @@
     <div class="server-name">
       <span class="red">J</span><span class="white">-CITY</span>
     </div>
+
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="progress-percent" id="progressPercent">0%</span>
+        <span class="progress-file" id="progressFile">initializing...</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
   </div>
 
   <script>
     (function() {
-      window.setLoad = function() {};
-      window.DownloadingFile = function() {};
-      window.SetStatusChanged = function() {};
-      window.SetFilesTotal = function() {};
-      window.SetFilesNeeded = function() {};
+      const progressFill    = document.getElementById('progressFill');
+      const progressPercent = document.getElementById('progressPercent');
+      const progressFile    = document.getElementById('progressFile');
+
+      let currentProgress = 0;
+      let targetProgress  = 0;
+      let smoothInterval  = null;
+
+      function smoothProgress() {
+        if (smoothInterval) return;
+        smoothInterval = setInterval(() => {
+          if (Math.abs(currentProgress - targetProgress) < 0.1) {
+            currentProgress = targetProgress;
+            progressFill.style.width = currentProgress + '%';
+            progressPercent.textContent = Math.round(currentProgress) + '%';
+            clearInterval(smoothInterval);
+            smoothInterval = null;
+            return;
+          }
+          currentProgress += (targetProgress - currentProgress) * 0.15;
+          progressFill.style.width = currentProgress + '%';
+          progressPercent.textContent = Math.round(currentProgress) + '%';
+        }, 30);
+      }
+
+      window.setLoad = function(percentage) {
+        const p = Math.max(0, Math.min(100, Number(percentage) || 0));
+        if (p > targetProgress) {
+          targetProgress = p;
+          smoothProgress();
+        }
+      };
+
+      const origDownloadingFile = window.DownloadingFile;
+      window.DownloadingFile = function(filename) {
+        if (typeof origDownloadingFile === 'function') {
+          try { origDownloadingFile(filename); } catch(e) {}
+        }
+        if (progressFile && filename) {
+          progressFile.textContent = filename.length > 34
+            ? filename.slice(0, 31) + '...'
+            : filename;
+        }
+      };
+
+      const origSetStatusChanged = window.SetStatusChanged;
+      window.SetStatusChanged = function(status) {
+        if (typeof origSetStatusChanged === 'function') {
+          try { origSetStatusChanged(status); } catch(e) {}
+        }
+        if (progressFile && status) {
+          progressFile.textContent = status;
+        }
+        if (status === 'Workshop Complete') window.setLoad(80);
+        else if (status === 'Client info sent!') window.setLoad(95);
+        else if (status === 'Starting Lua...')   window.setLoad(100);
+      };
+
+      const origSetFilesTotal = window.SetFilesTotal;
+      window.SetFilesTotal = function(total) {
+        if (typeof origSetFilesTotal === 'function') {
+          try { origSetFilesTotal(total); } catch(e) {}
+        }
+        window._totalFiles = total;
+        if (progressFile) progressFile.textContent = 'files: ' + total;
+      };
+
+      const origSetFilesNeeded = window.SetFilesNeeded;
+      window.SetFilesNeeded = function(needed) {
+        if (typeof origSetFilesNeeded === 'function') {
+          try { origSetFilesNeeded(needed); } catch(e) {}
+        }
+        if (window._totalFiles && window._totalFiles > 0) {
+          const p = 100 - Math.round((needed / window._totalFiles) * 100);
+          window.setLoad(p);
+        }
+      };
+
+      const origGameDetails = window.GameDetails;
+      window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
+        if (typeof origGameDetails === 'function') {
+          try { origGameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode); } catch(e) {}
+        }
+        window.setLoad(1);
+        if (progressFile) progressFile.textContent = 'connecting...';
+      };
+
+      let fallbackActive = true;
+      let fallbackProgress = 0;
+
+      const fallbackCheck = setInterval(() => {
+        if (window._totalFiles && window._totalFiles > 0) {
+          fallbackActive = false;
+          clearInterval(fallbackCheck);
+        }
+      }, 500);
+
+      const fallbackInterval = setInterval(() => {
+        if (!fallbackActive) {
+          clearInterval(fallbackInterval);
+          return;
+        }
+        if (fallbackProgress < 85) {
+          fallbackProgress += Math.random() * 1.5 + 0.3;
+          if (fallbackProgress > 85) fallbackProgress = 85;
+          window.setLoad(fallbackProgress);
+        }
+      }, 400);
+
+      setTimeout(() => {
+        if (targetProgress < 1) {
+          window.setLoad(1);
+          if (progressFile) progressFile.textContent = 'loading...';
+        }
+      }, 3000);
 
       const SLIDESHOW_PATH = 'images/';
       const SLIDESHOW_EXT = '.jpg';
-      const SLIDESHOW_COUNT = 45;
+      const SLIDESHOW_COUNT = 38;
       const SLIDE_INTERVAL = 7000;
 
       (function initSlideshow() {
@@ -192,9 +347,8 @@
           return div;
         });
 
-        let order = [];
         let idx = 0;
-        let currentSlide = null;
+        let order = [];
 
         function shuffled(n) {
           const a = Array.from({length: n}, (_, i) => i);
@@ -205,71 +359,30 @@
           return a;
         }
 
-        function resetSlide(el) {
-          el.classList.remove('active', 'leaving');
-          el.style.transition = 'none';
-          el.style.opacity = '0';
-          el.style.transform = 'translateX(100%) scale(1.05)';
-          void el.offsetWidth;
-          el.style.transition = '';
-        }
-
         function showFirst() {
           order = shuffled(slides.length);
           idx = 0;
-          currentSlide = slides[order[idx]];
-          currentSlide.style.transition = 'none';
-          currentSlide.style.opacity = '1';
-          currentSlide.style.transform = 'translateX(0) scale(1.05)';
-          currentSlide.classList.add('active');
-          void currentSlide.offsetWidth;
-          currentSlide.style.transition = '';
+          slides[order[idx]].classList.add('active');
         }
 
         function nextSlide() {
-          if (!currentSlide) return;
-
-          const old = currentSlide;
-          old.classList.remove('active');
-          old.classList.add('leaving');
+          const current = slides[order[idx]];
+          current.classList.remove('active');
+          void current.offsetWidth;
+          current.style.animation = 'none';
 
           idx = (idx + 1) % order.length;
-          if (idx === 0) {
-            order = shuffled(slides.length);
-          }
+          if (idx === 0) order = shuffled(slides.length);
 
-          let next = slides[order[idx]];
-          if (next === old) {
-            idx = (idx + 1) % order.length;
-            if (idx === 0) order = shuffled(slides.length);
-            next = slides[order[idx]];
-          }
-
-          next.style.transition = 'none';
-          next.classList.remove('active', 'leaving');
-          next.style.opacity = '0';
-          next.style.transform = 'translateX(100%) scale(1.05)';
-          void next.offsetWidth;
-          next.style.transition = '';
-
-          requestAnimationFrame(() => {
-            next.classList.add('active');
-            next.style.opacity = '';
-            next.style.transform = '';
-          });
-
-          currentSlide = next;
-
-          setTimeout(() => {
-            old.classList.remove('leaving');
-            resetSlide(old);
-          }, 1400);
+          const next = slides[order[idx]];
+          next.style.animation = '';
+          next.classList.add('active');
         }
 
         if (slides.length === 0) return;
 
         let loaded = 0;
-        images.forEach((src) => {
+        images.forEach((src, i) => {
           const im = new Image();
           im.onload = im.onerror = () => {
             loaded++;
