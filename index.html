@@ -111,6 +111,30 @@
       text-overflow: ellipsis;
     }
 
+    .photo-credit {
+      position: fixed;
+      right: 1.4rem;
+      bottom: 1.4rem;
+      z-index: 10;
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(200, 200, 210, 0.55);
+      font-weight: 300;
+      user-select: none;
+      pointer-events: none;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+      transition: opacity 0.4s ease;
+    }
+    .photo-credit .pc-label {
+      color: rgba(140, 140, 150, 0.65);
+      margin-right: 0.35rem;
+    }
+    .photo-credit .pc-name {
+      color: rgba(240, 240, 244, 0.75);
+      font-weight: 600;
+    }
+
     .content {
       position: relative; z-index: 2;
       display: flex; flex-direction: column;
@@ -137,6 +161,7 @@
       .now-playing { top: 10px; font-size: 0.62rem; padding: 0.35rem 0.8rem 0.35rem 0.65rem; }
       .now-playing .np-label { font-size: 0.55rem; }
       .now-playing .np-track { max-width: 40vw; }
+      .photo-credit { right: 0.9rem; bottom: 0.9rem; font-size: 0.55rem; }
     }
 
     ::-webkit-scrollbar { width: 0; height: 0; }
@@ -153,6 +178,11 @@
     <span class="np-icon"></span>
     <span class="np-label">now playing:</span>
     <span class="np-track" id="npTrack">—</span>
+  </div>
+
+  <div class="photo-credit" id="photoCredit">
+    <span class="pc-label">photo by</span>
+    <span class="pc-name" id="photoCreditName"></span>
   </div>
 
   <div class="content">
@@ -174,6 +204,86 @@
       const SLIDESHOW_EXT = '.jpg';
       const SLIDESHOW_COUNT = 61;
       const SLIDE_INTERVAL = 7000;
+      const PHOTO_CREDITS = [
+        'Niko Heizenberg', // 1.jpg
+        'Гриша', // 2.jpg
+        'Niko Heizenberg', // 3.jpg
+        'Niko Heizenberg', // 4.jpg
+        'Konekt (SGT)', // 5.jpg
+        'Konekt (SGT)', // 6.jpg
+        'Ledak', // 7.jpg
+        'Niko Heizenberg', // 8.jpg
+        'Konekt (SGT)', // 9.jpg
+        'Konekt (SGT)', // 10.jpg
+        'Niko Heizenberg', // 11.jpg
+        'Niko Heizenberg', // 12.jpg
+        'Azazlo', // 13.jpg
+        'Azazlo', // 14.jpg
+        'Azazlo', // 15.jpg
+        'Azazlo', // 16.jpg
+        'Azazlo', // 17.jpg
+        'Azazlo', // 18.jpg
+        'Azazlo', // 19.jpg
+        'Azazlo', // 20.jpg
+        'Ledak', // 21.jpg
+        'Niko Heizenberg', // 22.jpg
+        'ZOV SIGMO OBEBAS', // 23.jpg
+        'Niko Heizenberg', // 24.jpg
+        'Гриша', // 25.jpg
+        'Гриша', // 26.jpg
+        'Nerf.Man', // 27.jpg
+        'ZOV SIGMA OBEBAS', // 28.jpg
+        'Гриша', // 29.jpg
+        'Niko Heizenberg', // 30.jpg
+        'ZOV SIGMA OBEBAS', // 31.jpg
+        'Ledak', // 32.jpg
+        'Гриша', // 33.jpg
+        'Гриша', // 34.jpg
+        'Гриша', // 35.jpg
+        'Гриша', // 36.jpg
+        'Гриша', // 37.jpg
+        'Гриша', // 38.jpg
+        'МЫНОСКА)))', // 39.jpg
+        'Azazlo', // 40.jpg
+        'Niko Heizenberg', // 41.jpg
+        'Niko Heizenberg', // 42.jpg
+        'Niko Heizenberg', // 43.jpg
+        'Niko Heizenberg', // 44.jpg
+        'Niko Heizenberg', // 45.jpg
+        'Гриша', // 46.jpg
+        'Niko Heizenberg', // 47.jpg
+        'Гриша', // 48.jpg
+        'Niko Heizenberg', // 49.jpg
+        'ZOV SIGMA OBEBAS', // 50.jpg
+        'Niko Heizenberg', // 51.jpg
+        'Niko Heizenberg', // 52.jpg
+        'Гриша', // 53.jpg
+        'Гриша', // 54.jpg
+        'Niko Heizenberg', // 55.jpg
+        'Niko Heizenberg', // 56.jpg
+        'Azazlo', // 57.jpg
+        'Niko Heizenberg', // 58.jpg
+        'Azazlo', // 59.jpg
+        'Гриша', // 60.jpg
+        'Niko Heizenberg'  // 61.jpg
+      ];
+      const DEFAULT_PHOTO_CREDIT = '';
+
+      const creditEl = document.getElementById('photoCredit');
+      const creditNameEl = document.getElementById('photoCreditName');
+
+      function showPhotoCredit(imageIndex) {
+        if (!creditEl || !creditNameEl) return;
+        const name = (PHOTO_CREDITS[imageIndex] || DEFAULT_PHOTO_CREDIT || '').trim();
+        if (name) {
+          creditNameEl.textContent = name;
+          creditEl.style.display = '';
+          creditEl.style.opacity = '1';
+        } else {
+          creditNameEl.textContent = '';
+          creditEl.style.opacity = '0';
+        }
+      }
 
       (function initSlideshow() {
         const container = document.getElementById('bgSlideshow');
@@ -208,6 +318,7 @@
           order = shuffled(slides.length);
           idx = 0;
           slides[order[idx]].classList.add('active');
+          showPhotoCredit(order[idx]);
         }
 
         function nextSlide() {
@@ -222,6 +333,7 @@
           const next = slides[order[idx]];
           next.style.animation = '';
           next.classList.add('active');
+          showPhotoCredit(order[idx]);
         }
 
         if (slides.length === 0) return;
