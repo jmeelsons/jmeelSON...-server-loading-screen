@@ -31,18 +31,19 @@
       background-size: cover;
       background-position: center;
       opacity: 0;
-      transform: scale(1.12);
-      transition: opacity 1.6s ease;
+      transform: translateX(100%) scale(1.05);
+      transition: opacity 1.2s ease, transform 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       will-change: opacity, transform;
     }
     .bg-slide.active {
       opacity: 1;
-      animation: kenburns 9s ease-out forwards;
+      transform: translateX(0) scale(1.05);
     }
-    @keyframes kenburns {
-      0%   { transform: scale(1.12) translate(0, 0); }
-      100% { transform: scale(1.22) translate(-1.5%, -1%); }
+    .bg-slide.leaving {
+      opacity: 0;
+      transform: translateX(-8%) scale(1.02);
     }
+
     .bg-slideshow::after {
       content: '';
       position: absolute; inset: 0;
@@ -206,20 +207,35 @@
         function showFirst() {
           order = shuffled(slides.length);
           idx = 0;
-          slides[order[idx]].classList.add('active');
+          const first = slides[order[idx]];
+          first.style.transition = 'none';
+          first.classList.add('active');
+          void first.offsetWidth;
+          first.style.transition = '';
         }
 
         function nextSlide() {
           const current = slides[order[idx]];
           current.classList.remove('active');
-          void current.offsetWidth;
-          current.style.animation = 'none';
+          current.classList.add('leaving');
+
+          setTimeout(() => {
+            current.classList.remove('leaving');
+            current.style.transition = 'none';
+            current.style.transform = 'translateX(100%) scale(1.05)';
+            void current.offsetWidth;
+            current.style.transition = '';
+          }, 1400);
 
           idx = (idx + 1) % order.length;
           if (idx === 0) order = shuffled(slides.length);
 
           const next = slides[order[idx]];
-          next.style.animation = '';
+          next.style.transition = 'none';
+          next.style.transform = 'translateX(100%) scale(1.05)';
+          next.style.opacity = '0';
+          void next.offsetWidth;
+          next.style.transition = '';
           next.classList.add('active');
         }
 
