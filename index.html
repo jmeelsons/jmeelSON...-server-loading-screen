@@ -128,48 +128,12 @@
     .server-name .red   { color: rgba(255, 0, 0, 255); }
     .server-name .white { color: #ffffff; }
 
-    .progress-wrap {
-      width: 320px; max-width: 80vw;
-      display: flex; flex-direction: column; gap: 0.45rem;
-    }
-    .progress-info {
-      display: flex; align-items: baseline; justify-content: space-between;
-      font-size: 0.72rem; letter-spacing: 0.14em;
-      text-transform: uppercase; color: #b8b8c0; font-weight: 300;
-    }
-    .progress-percent {
-      color: rgba(220, 60, 60, 0.95);
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-      min-width: 3.2em; text-align: left;
-    }
-    .progress-file {
-      flex: 1; text-align: right;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      color: #9a9aa2; font-size: 0.66rem; letter-spacing: 0.08em;
-    }
-    .progress-track {
-      position: relative; width: 100%; height: 2px;
-      background: rgba(255, 255, 255, 0.12);
-      border-radius: 2px; overflow: hidden;
-    }
-    .progress-fill {
-      position: absolute; top: 0; left: 0;
-      height: 100%; width: 0%;
-      background: linear-gradient(90deg, rgba(160, 30, 30, 0.9), rgba(220, 60, 60, 1));
-      box-shadow: 0 0 10px rgba(220, 60, 60, 0.5);
-      border-radius: 2px;
-      transition: width 0.35s ease;
-    }
-
     @media (max-width: 1280px) { .server-name { font-size: 4.6rem; } }
     @media (max-width: 1024px) { .server-name { font-size: 3.8rem; } }
     @media (max-width: 768px)  { .server-name { font-size: 3rem; } }
     @media (max-width: 480px)  {
       .content { padding: 0 0 1.4rem 1.2rem; }
       .server-name { font-size: 2.2rem; margin-bottom: 0.5rem; }
-      .progress-wrap { width: 240px; }
-      .progress-file { font-size: 0.6rem; }
       .now-playing { top: 10px; font-size: 0.62rem; padding: 0.35rem 0.8rem 0.35rem 0.65rem; }
       .now-playing .np-label { font-size: 0.55rem; }
       .now-playing .np-track { max-width: 40vw; }
@@ -195,139 +159,20 @@
     <div class="server-name">
       <span class="red">J</span><span class="white">-CITY</span>
     </div>
-
-    <div class="progress-wrap">
-      <div class="progress-info">
-        <span class="progress-percent" id="progressPercent">0%</span>
-        <span class="progress-file" id="progressFile">initializing...</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-    </div>
   </div>
 
   <script>
     (function() {
-      const progressFill    = document.getElementById('progressFill');
-      const progressPercent = document.getElementById('progressPercent');
-      const progressFile    = document.getElementById('progressFile');
-
-      let currentProgress = 0;
-      let targetProgress  = 0;
-      let smoothInterval  = null;
-
-      function smoothProgress() {
-        if (smoothInterval) return;
-        smoothInterval = setInterval(() => {
-          if (Math.abs(currentProgress - targetProgress) < 0.1) {
-            currentProgress = targetProgress;
-            progressFill.style.width = currentProgress + '%';
-            progressPercent.textContent = Math.round(currentProgress) + '%';
-            clearInterval(smoothInterval);
-            smoothInterval = null;
-            return;
-          }
-          currentProgress += (targetProgress - currentProgress) * 0.15;
-          progressFill.style.width = currentProgress + '%';
-          progressPercent.textContent = Math.round(currentProgress) + '%';
-        }, 30);
-      }
-
-      window.setLoad = function(percentage) {
-        const p = Math.max(0, Math.min(100, Number(percentage) || 0));
-        if (p > targetProgress) {
-          targetProgress = p;
-          smoothProgress();
-        }
-      };
-
-      const origDownloadingFile = window.DownloadingFile;
-      window.DownloadingFile = function(filename) {
-        if (typeof origDownloadingFile === 'function') {
-          try { origDownloadingFile(filename); } catch(e) {}
-        }
-        if (progressFile && filename) {
-          progressFile.textContent = filename.length > 34
-            ? filename.slice(0, 31) + '...'
-            : filename;
-        }
-      };
-
-      const origSetStatusChanged = window.SetStatusChanged;
-      window.SetStatusChanged = function(status) {
-        if (typeof origSetStatusChanged === 'function') {
-          try { origSetStatusChanged(status); } catch(e) {}
-        }
-        if (progressFile && status) {
-          progressFile.textContent = status;
-        }
-        if (status === 'Workshop Complete') window.setLoad(80);
-        else if (status === 'Client info sent!') window.setLoad(95);
-        else if (status === 'Starting Lua...')   window.setLoad(100);
-      };
-
-      const origSetFilesTotal = window.SetFilesTotal;
-      window.SetFilesTotal = function(total) {
-        if (typeof origSetFilesTotal === 'function') {
-          try { origSetFilesTotal(total); } catch(e) {}
-        }
-        window._totalFiles = total;
-        if (progressFile) progressFile.textContent = 'files: ' + total;
-      };
-
-      const origSetFilesNeeded = window.SetFilesNeeded;
-      window.SetFilesNeeded = function(needed) {
-        if (typeof origSetFilesNeeded === 'function') {
-          try { origSetFilesNeeded(needed); } catch(e) {}
-        }
-        if (window._totalFiles && window._totalFiles > 0) {
-          const p = 100 - Math.round((needed / window._totalFiles) * 100);
-          window.setLoad(p);
-        }
-      };
-
-      const origGameDetails = window.GameDetails;
-      window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
-        if (typeof origGameDetails === 'function') {
-          try { origGameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode); } catch(e) {}
-        }
-        window.setLoad(1);
-        if (progressFile) progressFile.textContent = 'connecting...';
-      };
-
-      let fallbackActive = true;
-      let fallbackProgress = 0;
-
-      const fallbackCheck = setInterval(() => {
-        if (window._totalFiles && window._totalFiles > 0) {
-          fallbackActive = false;
-          clearInterval(fallbackCheck);
-        }
-      }, 500);
-
-      const fallbackInterval = setInterval(() => {
-        if (!fallbackActive) {
-          clearInterval(fallbackInterval);
-          return;
-        }
-        if (fallbackProgress < 85) {
-          fallbackProgress += Math.random() * 1.5 + 0.3;
-          if (fallbackProgress > 85) fallbackProgress = 85;
-          window.setLoad(fallbackProgress);
-        }
-      }, 400);
-
-      setTimeout(() => {
-        if (targetProgress < 1) {
-          window.setLoad(1);
-          if (progressFile) progressFile.textContent = 'loading...';
-        }
-      }, 3000);
+      window.setLoad = function() {};
+      window.DownloadingFile = function() {};
+      window.SetStatusChanged = function() {};
+      window.SetFilesTotal = function() {};
+      window.SetFilesNeeded = function() {};
+      window.GameDetails = function() {};
 
       const SLIDESHOW_PATH = 'images/';
       const SLIDESHOW_EXT = '.jpg';
-      const SLIDESHOW_COUNT = 38;
+      const SLIDESHOW_COUNT = 45;
       const SLIDE_INTERVAL = 7000;
 
       (function initSlideshow() {
