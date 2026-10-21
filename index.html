@@ -192,8 +192,9 @@
           return div;
         });
 
-        let idx = 0;
         let order = [];
+        let idx = 0;
+        let currentSlide = null;
 
         function shuffled(n) {
           const a = Array.from({length: n}, (_, i) => i);
@@ -204,45 +205,71 @@
           return a;
         }
 
+        function resetSlide(el) {
+          el.classList.remove('active', 'leaving');
+          el.style.transition = 'none';
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(100%) scale(1.05)';
+          void el.offsetWidth;
+          el.style.transition = '';
+        }
+
         function showFirst() {
           order = shuffled(slides.length);
           idx = 0;
-          const first = slides[order[idx]];
-          first.style.transition = 'none';
-          first.classList.add('active');
-          void first.offsetWidth;
-          first.style.transition = '';
+          currentSlide = slides[order[idx]];
+          currentSlide.style.transition = 'none';
+          currentSlide.style.opacity = '1';
+          currentSlide.style.transform = 'translateX(0) scale(1.05)';
+          currentSlide.classList.add('active');
+          void currentSlide.offsetWidth;
+          currentSlide.style.transition = '';
         }
 
         function nextSlide() {
-          const current = slides[order[idx]];
-          current.classList.remove('active');
-          current.classList.add('leaving');
+          if (!currentSlide) return;
 
-          setTimeout(() => {
-            current.classList.remove('leaving');
-            current.style.transition = 'none';
-            current.style.transform = 'translateX(100%) scale(1.05)';
-            void current.offsetWidth;
-            current.style.transition = '';
-          }, 1400);
+          const old = currentSlide;
+          old.classList.remove('active');
+          old.classList.add('leaving');
 
           idx = (idx + 1) % order.length;
-          if (idx === 0) order = shuffled(slides.length);
+          if (idx === 0) {
+            order = shuffled(slides.length);
+          }
 
-          const next = slides[order[idx]];
+          let next = slides[order[idx]];
+          if (next === old) {
+            idx = (idx + 1) % order.length;
+            if (idx === 0) order = shuffled(slides.length);
+            next = slides[order[idx]];
+          }
+
           next.style.transition = 'none';
-          next.style.transform = 'translateX(100%) scale(1.05)';
+          next.classList.remove('active', 'leaving');
           next.style.opacity = '0';
+          next.style.transform = 'translateX(100%) scale(1.05)';
           void next.offsetWidth;
           next.style.transition = '';
-          next.classList.add('active');
+
+          requestAnimationFrame(() => {
+            next.classList.add('active');
+            next.style.opacity = '';
+            next.style.transform = '';
+          });
+
+          currentSlide = next;
+
+          setTimeout(() => {
+            old.classList.remove('leaving');
+            resetSlide(old);
+          }, 1400);
         }
 
         if (slides.length === 0) return;
 
         let loaded = 0;
-        images.forEach((src, i) => {
+        images.forEach((src) => {
           const im = new Image();
           im.onload = im.onerror = () => {
             loaded++;
