@@ -26,43 +26,6 @@
       overflow: hidden;
       background: #000;
       pointer-events: none;
-      perspective: 1200px;
-      perspective-origin: 50% 50%;
-    }
-
-    .bg-slide {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 78vw;
-      height: 82vh;
-      background-size: cover;
-      background-position: center;
-      border-radius: 4px;
-      box-shadow:
-        0 40px 120px rgba(0, 0, 0, 0.85),
-        0 0 0 1px rgba(255, 255, 255, 0.04);
-      opacity: 0;
-      transform: translate(-50%, -50%) translateX(-120vw) rotateY(14deg) scale(0.92);
-      transform-origin: center center;
-      transition:
-        transform 1.5s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 1.5s ease;
-      will-change: transform, opacity;
-      backface-visibility: hidden;
-    }
-
-    .bg-slide.active {
-      opacity: 1;
-      transform: translate(-50%, -50%) translateX(0) rotateY(0deg) scale(1);
-    }
-
-    .bg-slide.leaving {
-      opacity: 0;
-      transform: translate(-50%, -50%) translateX(40vw) rotateY(-12deg) scale(0.94);
-      transition:
-        transform 1.5s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 1.2s ease;
     }
 
     .bg-parallax-layer {
@@ -190,7 +153,6 @@
       .now-playing .np-label { font-size: 0.55rem; }
       .now-playing .np-track { max-width: 40vw; }
       .photo-credit { bottom: 0.9rem; font-size: 0.55rem; }
-      .bg-slide { width: 92vw; height: 70vh; }
     }
 
     ::-webkit-scrollbar { width: 0; height: 0; }
@@ -201,7 +163,9 @@
   <script src="main.js"></script>
 </head>
 <body>
-  <div class="bg-slideshow" id="bgSlideshow"></div>
+  <div class="bg-slideshow" id="bgSlideshow">
+    <div class="bg-parallax-layer" id="bgParallax"></div>
+  </div>
 
   <div class="now-playing" id="nowPlaying">
     <span class="np-icon"></span>
@@ -314,29 +278,17 @@
         }
       }
 
-      (function initSlideshow() {
-        const container = document.getElementById('bgSlideshow');
-        if (!container) return;
+      (function initParallax() {
+        const parallaxLayer = document.getElementById('bgParallax');
+        if (!parallaxLayer) return;
 
         const images = [];
         for (let i = 1; i <= SLIDESHOW_COUNT; i++) {
           images.push(SLIDESHOW_PATH + i + SLIDESHOW_EXT);
         }
 
-        const parallaxLayer = document.createElement('div');
-        parallaxLayer.className = 'bg-parallax-layer';
-        container.insertBefore(parallaxLayer, container.firstChild);
-
-        const slides = images.map((src) => {
-          const div = document.createElement('div');
-          div.className = 'bg-slide';
-          div.style.backgroundImage = 'url("' + src + '")';
-          container.appendChild(div);
-          return div;
-        });
-
-        let idx = 0;
         let order = [];
+        let idx = 0;
 
         function shuffled(n) {
           const a = Array.from({length: n}, (_, i) => i);
@@ -347,37 +299,31 @@
           return a;
         }
 
-        function showFirst() {
-          order = shuffled(slides.length);
-          idx = 0;
-          slides[order[idx]].classList.add('active');
-          parallaxLayer.style.backgroundImage = 'url("' + images[order[idx]] + '")';
-          parallaxLayer.classList.add('active');
-          showPhotoCredit(order[idx]);
+        function setImage(imageIndex) {
+          parallaxLayer.style.backgroundImage = 'url("' + images[imageIndex] + '")';
+          showPhotoCredit(imageIndex);
         }
 
-        function nextSlide() {
-          const current = slides[order[idx]];
-          current.classList.remove('active');
-          current.classList.add('leaving');
+        function showFirst() {
+          order = shuffled(images.length);
+          idx = 0;
+          setImage(order[idx]);
+          parallaxLayer.classList.add('active');
+        }
 
-          setTimeout(() => {
-            current.classList.remove('leaving');
-          }, 1600);
+        function nextImage() {
+          parallaxLayer.classList.remove('active');
 
           idx = (idx + 1) % order.length;
-          if (idx === 0) order = shuffled(slides.length);
+          if (idx === 0) order = shuffled(images.length);
 
-          const next = slides[order[idx]];
-          next.classList.remove('active', 'leaving');
-          void next.offsetWidth;
-          next.classList.add('active');
+          const nextIndex = order[idx];
 
-          parallaxLayer.style.backgroundImage = 'url("' + images[order[idx]] + '")';
-          showPhotoCredit(order[idx]);
+          setTimeout(() => {
+            setImage(nextIndex);
+            parallaxLayer.classList.add('active');
+          }, 250);
         }
-
-        if (slides.length === 0) return;
 
         let targetX = 0, targetY = 0;
         let currentX = 0, currentY = 0;
@@ -414,7 +360,7 @@
           if (started) return;
           started = true;
           showFirst();
-          setInterval(nextSlide, SLIDE_INTERVAL);
+          setInterval(nextImage, SLIDE_INTERVAL);
         }
 
         setTimeout(start, 2000);
