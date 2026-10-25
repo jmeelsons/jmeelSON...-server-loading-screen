@@ -18,6 +18,67 @@
       overflow: hidden;
     }
 
+    .bg-slideshow {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0;
+      overflow: hidden;
+      background: #000;
+      pointer-events: none;
+      perspective: 1200px;
+      perspective-origin: 50% 50%;
+    }
+
+    .bg-slide {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 78vw;
+      height: 82vh;
+      background-size: cover;
+      background-position: center;
+      border-radius: 4px;
+      box-shadow:
+        0 40px 120px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(255, 255, 255, 0.04);
+      opacity: 0;
+      transform: translate(-50%, -50%) translateX(-120vw) rotateY(14deg) scale(0.92);
+      transform-origin: center center;
+      transition:
+        transform 1.5s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 1.5s ease;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+    }
+
+    .bg-slide.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) translateX(0) rotateY(0deg) scale(1);
+    }
+
+    .bg-slide.leaving {
+      opacity: 0;
+      transform: translate(-50%, -50%) translateX(40vw) rotateY(-12deg) scale(0.94);
+      transition:
+        transform 1.5s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 1.2s ease;
+    }
+
+    .bg-parallax-layer {
+      position: absolute;
+      inset: -6%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 1.6s ease, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform, opacity;
+      filter: brightness(0.85) contrast(1.05);
+    }
+    .bg-parallax-layer.active {
+      opacity: 1;
+    }
+
     .now-playing {
       position: fixed;
       top: 18px;
@@ -129,6 +190,7 @@
       .now-playing .np-label { font-size: 0.55rem; }
       .now-playing .np-track { max-width: 40vw; }
       .photo-credit { bottom: 0.9rem; font-size: 0.55rem; }
+      .bg-slide { width: 92vw; height: 70vh; }
     }
 
     ::-webkit-scrollbar { width: 0; height: 0; }
@@ -139,6 +201,8 @@
   <script src="main.js"></script>
 </head>
 <body>
+  <div class="bg-slideshow" id="bgSlideshow"></div>
+
   <div class="now-playing" id="nowPlaying">
     <span class="np-icon"></span>
     <span class="np-label">now playing:</span>
@@ -164,6 +228,197 @@
       window.SetFilesTotal = function() {};
       window.SetFilesNeeded = function() {};
       window.GameDetails = function() {};
+
+      const SLIDESHOW_PATH = 'images/';
+      const SLIDESHOW_EXT = '.jpg';
+      const SLIDESHOW_COUNT = 61;
+      const SLIDE_INTERVAL = 7000;
+      const PHOTO_CREDITS = [
+        'Niko Heizenberg', // 1.jpg
+        'Гриша', // 2.jpg
+        'Niko Heizenberg', // 3.jpg
+        'Niko Heizenberg', // 4.jpg
+        'Konekt (SGT)', // 5.jpg
+        'Konekt (SGT)', // 6.jpg
+        'Ledak', // 7.jpg
+        'Niko Heizenberg', // 8.jpg
+        'Konekt (SGT)', // 9.jpg
+        'Konekt (SGT)', // 10.jpg
+        'Niko Heizenberg', // 11.jpg
+        'Niko Heizenberg', // 12.jpg
+        'Azazlo', // 13.jpg
+        'Azazlo', // 14.jpg
+        'Azazlo', // 15.jpg
+        'Azazlo', // 16.jpg
+        'Azazlo', // 17.jpg
+        'Azazlo', // 18.jpg
+        'Azazlo', // 19.jpg
+        'Azazlo', // 20.jpg
+        'Ledak', // 21.jpg
+        'Niko Heizenberg', // 22.jpg
+        'ZOV SIGMO OBEBAS', // 23.jpg
+        'Niko Heizenberg', // 24.jpg
+        'Гриша', // 25.jpg
+        'Гриша', // 26.jpg
+        'Nerf.Man', // 27.jpg
+        'ZOV SIGMO OBEBAS', // 28.jpg
+        'Гриша', // 29.jpg
+        'Niko Heizenberg', // 30.jpg
+        'Гриша', // 31.jpg
+        'Гриша', // 32.jpg
+        'Гриша', // 33.jpg
+        'Гриша', // 34.jpg
+        'Гриша', // 35.jpg
+        'Гриша', // 36.jpg
+        'Гриша', // 37.jpg
+        'Гриша', // 38.jpg
+        'МЫНОСКА)))', // 39.jpg
+        'Azazlo', // 40.jpg
+        'Niko Heizenberg', // 41.jpg
+        'Niko Heizenberg', // 42.jpg
+        'Niko Heizenberg', // 43.jpg
+        'Niko Heizenberg', // 44.jpg
+        'Niko Heizenberg', // 45.jpg
+        'Гриша', // 46.jpg
+        'Niko Heizenberg', // 47.jpg
+        'Гриша', // 48.jpg
+        'Niko Heizenberg', // 49.jpg
+        'ZOV SIGMO OBEBAS', // 50.jpg
+        'Niko Heizenberg', // 51.jpg
+        'Niko Heizenberg', // 52.jpg
+        'Гриша', // 53.jpg
+        'Гриша', // 54.jpg
+        'Niko Heizenberg', // 55.jpg
+        'Niko Heizenberg', // 56.jpg
+        'Azazlo', // 57.jpg
+        'Niko Heizenberg', // 58.jpg
+        'Azazlo', // 59.jpg
+        'Гриша', // 60.jpg
+        'Niko Heizenberg'  // 61.jpg
+      ];
+      const DEFAULT_PHOTO_CREDIT = '';
+
+      const creditEl = document.getElementById('photoCredit');
+      const creditNameEl = document.getElementById('photoCreditName');
+
+      function showPhotoCredit(imageIndex) {
+        if (!creditEl || !creditNameEl) return;
+        const name = (PHOTO_CREDITS[imageIndex] || DEFAULT_PHOTO_CREDIT || '').trim();
+        if (name) {
+          creditNameEl.textContent = name;
+          creditEl.style.display = '';
+          creditEl.style.opacity = '1';
+        } else {
+          creditNameEl.textContent = '';
+          creditEl.style.opacity = '0';
+        }
+      }
+
+      (function initSlideshow() {
+        const container = document.getElementById('bgSlideshow');
+        if (!container) return;
+
+        const images = [];
+        for (let i = 1; i <= SLIDESHOW_COUNT; i++) {
+          images.push(SLIDESHOW_PATH + i + SLIDESHOW_EXT);
+        }
+
+        const parallaxLayer = document.createElement('div');
+        parallaxLayer.className = 'bg-parallax-layer';
+        container.insertBefore(parallaxLayer, container.firstChild);
+
+        const slides = images.map((src) => {
+          const div = document.createElement('div');
+          div.className = 'bg-slide';
+          div.style.backgroundImage = 'url("' + src + '")';
+          container.appendChild(div);
+          return div;
+        });
+
+        let idx = 0;
+        let order = [];
+
+        function shuffled(n) {
+          const a = Array.from({length: n}, (_, i) => i);
+          for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+          }
+          return a;
+        }
+
+        function showFirst() {
+          order = shuffled(slides.length);
+          idx = 0;
+          slides[order[idx]].classList.add('active');
+          parallaxLayer.style.backgroundImage = 'url("' + images[order[idx]] + '")';
+          parallaxLayer.classList.add('active');
+          showPhotoCredit(order[idx]);
+        }
+
+        function nextSlide() {
+          const current = slides[order[idx]];
+          current.classList.remove('active');
+          current.classList.add('leaving');
+
+          setTimeout(() => {
+            current.classList.remove('leaving');
+          }, 1600);
+
+          idx = (idx + 1) % order.length;
+          if (idx === 0) order = shuffled(slides.length);
+
+          const next = slides[order[idx]];
+          next.classList.remove('active', 'leaving');
+          void next.offsetWidth;
+          next.classList.add('active');
+
+          parallaxLayer.style.backgroundImage = 'url("' + images[order[idx]] + '")';
+          showPhotoCredit(order[idx]);
+        }
+
+        if (slides.length === 0) return;
+
+        let targetX = 0, targetY = 0;
+        let currentX = 0, currentY = 0;
+
+        function animateParallax() {
+          currentX += (targetX - currentX) * 0.06;
+          currentY += (targetY - currentY) * 0.06;
+          parallaxLayer.style.transform =
+            'translate3d(' + (currentX * -22) + 'px,' + (currentY * -16) + 'px, 0) scale(1.08)';
+          requestAnimationFrame(animateParallax);
+        }
+
+        window.addEventListener('mousemove', (e) => {
+          const nx = (e.clientX / window.innerWidth) * 2 - 1;
+          const ny = (e.clientY / window.innerHeight) * 2 - 1;
+          targetX = nx;
+          targetY = ny;
+        }, { passive: true });
+
+        animateParallax();
+
+        let loaded = 0;
+        images.forEach((src) => {
+          const im = new Image();
+          im.onload = im.onerror = () => {
+            loaded++;
+            if (loaded === images.length) start();
+          };
+          im.src = src;
+        });
+
+        let started = false;
+        function start() {
+          if (started) return;
+          started = true;
+          showFirst();
+          setInterval(nextSlide, SLIDE_INTERVAL);
+        }
+
+        setTimeout(start, 2000);
+      })();
 
       const MUSIC_FILES = ['main_music.mp3','loading_music.mp3'];
       const MUSIC_PATH = 'music/';
