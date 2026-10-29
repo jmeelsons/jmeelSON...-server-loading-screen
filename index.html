@@ -8,38 +8,40 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background: #000;
+      background: #0d0d0f;
       min-height: 100vh;
       display: flex;
-      align-items: flex-end;
-      justify-content: flex-start;
+      align-items: center;
+      justify-content: center;
       font-family: 'Bahnschrift', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
       margin: 0;
       overflow: hidden;
     }
 
-    .bg-slideshow {
-      position: fixed;
-      top: 0; left: 0;
+    .bg-lines {
+      position: fixed; top: 0; left: 0;
       width: 100vw; height: 100vh;
-      z-index: 0;
-      overflow: hidden;
-      background: #000;
+      background: #0d0d0f; z-index: 0;
       pointer-events: none;
     }
+    .bg-lines canvas { display: block; width: 100%; height: 100%; }
 
-    .bg-parallax-layer {
-      position: absolute;
-      inset: -6%;
-      background-size: cover;
-      background-position: center;
-      opacity: 0;
-      transition: opacity 1.6s ease, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-      will-change: transform, opacity;
-      filter: brightness(0.85) contrast(1.05);
+    .falling-emojis {
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 1; pointer-events: none; overflow: hidden;
     }
-    .bg-parallax-layer.active {
-      opacity: 1;
+    .falling-emojis img {
+      position: absolute; top: -80px;
+      user-select: none; will-change: transform;
+      animation: fall linear infinite;
+      filter: blur(0.2px); opacity: 0.45;
+      image-rendering: auto;
+    }
+    @keyframes fall {
+      0%   { transform: translateY(-80px) rotate(0deg) scale(1); opacity: 0.55; }
+      70%  { opacity: 0.42; }
+      100% { transform: translateY(calc(100vh + 140px)) rotate(360deg) scale(1.15); opacity: 0.12; }
     }
 
     .now-playing {
@@ -101,58 +103,115 @@
       text-overflow: ellipsis;
     }
 
-    .photo-credit {
-      position: fixed;
-      left: 50%;
-      bottom: 1.4rem;
-      transform: translateX(-50%);
-      z-index: 10;
-      font-size: 0.62rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: rgba(200, 200, 210, 0.55);
-      font-weight: 300;
-      user-select: none;
-      pointer-events: none;
-      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
-      transition: opacity 0.4s ease;
-    }
-    .photo-credit .pc-label {
-      color: rgba(140, 140, 150, 0.65);
-      margin-right: 0.35rem;
-    }
-    .photo-credit .pc-name {
-      color: rgba(240, 240, 244, 0.75);
-      font-weight: 600;
-    }
-
     .content {
       position: relative; z-index: 2;
       display: flex; flex-direction: column;
-      align-items: flex-start; justify-content: flex-end;
-      padding: 0 0 2.2rem 2.6rem;
+      align-items: center; justify-content: center;
     }
 
     .server-name {
-      font-weight: 800; font-size: 6rem;
+      font-weight: 800; font-size: 12rem;
       letter-spacing: 0.06em; text-transform: uppercase;
-      margin-bottom: 0.7rem;
+      margin-bottom: 0.8rem;
       text-shadow: 0 0 60px rgba(155, 0, 0, 0.4), 0 2px 20px rgba(0, 0, 0, 0.7);
-      font-family: inherit; text-align: left; line-height: 1;
+      font-family: inherit; text-align: center; line-height: 1;
     }
     .server-name .red   { color: rgba(255, 0, 0, 255); }
     .server-name .white { color: #ffffff; }
 
-    @media (max-width: 1280px) { .server-name { font-size: 4.6rem; } }
-    @media (max-width: 1024px) { .server-name { font-size: 3.8rem; } }
-    @media (max-width: 768px)  { .server-name { font-size: 3rem; } }
+    .changing-messages {
+      position: relative; height: 2.4rem;
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; max-width: 600px;
+      padding: 0 1rem; margin-top: 0.2rem;
+    }
+    .message {
+      position: absolute; left: 0; right: 0;
+      text-align: center; color: #b0b0b8;
+      font-size: 1.05rem; letter-spacing: 0.12em;
+      font-weight: 300; text-transform: uppercase;
+      opacity: 0; transform: translateY(6px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none;
+      text-shadow: 0 0 10px rgba(200, 60, 60, 0.15);
+      white-space: nowrap;
+    }
+    .message.active { opacity: 1; transform: translateY(0); }
+
+    .message-line {
+      width: 120px; height: 1px; margin-top: 0.6rem;
+      background: linear-gradient(90deg, transparent, rgba(200, 60, 60, 0.4), transparent);
+      opacity: 0.5;
+    }
+
+    .progress-wrap {
+      width: 320px; max-width: 80vw;
+      margin-top: 1.6rem;
+      display: flex; flex-direction: column; gap: 0.45rem;
+    }
+    .progress-info {
+      display: flex; align-items: baseline; justify-content: space-between;
+      font-size: 0.72rem; letter-spacing: 0.14em;
+      text-transform: uppercase; color: #8a8a92; font-weight: 300;
+    }
+    .progress-percent {
+      color: rgba(220, 60, 60, 0.95);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      min-width: 3.2em; text-align: left;
+    }
+    .progress-file {
+      flex: 1; text-align: right;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: #6f6f78; font-size: 0.66rem; letter-spacing: 0.08em;
+    }
+    .progress-track {
+      position: relative; width: 100%; height: 2px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 2px; overflow: hidden;
+    }
+    .progress-fill {
+      position: absolute; top: 0; left: 0;
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, rgba(160, 30, 30, 0.9), rgba(220, 60, 60, 1));
+      box-shadow: 0 0 10px rgba(220, 60, 60, 0.5);
+      border-radius: 2px;
+      transition: width 0.35s ease;
+    }
+
+    .discord-footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.9rem 1rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #5a5a62;
+      font-weight: 300;
+      pointer-events: none;
+      user-select: none;
+      opacity: 0.7;
+      text-shadow: 0 0 10px rgba(200, 60, 60, 0.1);
+    }
+
+    @media (max-width: 1280px) { .server-name { font-size: 9rem; } }
+    @media (max-width: 1024px) { .server-name { font-size: 7rem; } }
+    @media (max-width: 768px)  { .server-name { font-size: 5rem; } }
     @media (max-width: 480px)  {
-      .content { padding: 0 0 1.4rem 1.2rem; }
-      .server-name { font-size: 2.2rem; margin-bottom: 0.5rem; }
+      .server-name { font-size: 3.2rem; margin-bottom: 0.6rem; }
+      .changing-messages { height: 2rem; }
+      .message { font-size: 0.85rem; letter-spacing: 0.08em; }
+      .falling-emojis img { width: 28px; }
+      .progress-wrap { width: 240px; margin-top: 1.2rem; }
+      .progress-file { font-size: 0.6rem; }
+      .discord-footer { font-size: 0.62rem; letter-spacing: 0.14em; padding: 0.7rem 0.6rem; }
       .now-playing { top: 10px; font-size: 0.62rem; padding: 0.35rem 0.8rem 0.35rem 0.65rem; }
       .now-playing .np-label { font-size: 0.55rem; }
       .now-playing .np-track { max-width: 40vw; }
-      .photo-credit { bottom: 0.9rem; font-size: 0.55rem; }
     }
 
     ::-webkit-scrollbar { width: 0; height: 0; }
@@ -163,9 +222,11 @@
   <script src="main.js"></script>
 </head>
 <body>
-  <div class="bg-slideshow" id="bgSlideshow">
-    <div class="bg-parallax-layer" id="bgParallax"></div>
+  <div class="bg-lines">
+    <canvas id="bgCanvas"></canvas>
   </div>
+
+  <div class="falling-emojis" id="fallingEmojis"></div>
 
   <div class="now-playing" id="nowPlaying">
     <span class="np-icon"></span>
@@ -173,207 +234,186 @@
     <span class="np-track" id="npTrack">—</span>
   </div>
 
-  <div class="photo-credit" id="photoCredit">
-    <span class="pc-label">photo by</span>
-    <span class="pc-name" id="photoCreditName"></span>
-  </div>
-
   <div class="content">
     <div class="server-name">
       <span class="red">J</span><span class="white">-CITY</span>
     </div>
+
+    <div class="changing-messages" id="changingMessages">
+      <span class="message active">Welcome to J-CITY :3</span>
+      <span class="message">Press F11 to help the server financially!</span>
+      <span class="message">Press F1 to open the spawnmenu!</span>
+      <span class="message">You have many functions available in: !menu</span>
+      <span class="message">Press F2 to enable the cursor in the game!</span>
+      <span class="message">just zbox_respawn for respawn.</span>
+      <span class="message">The ESC menu has a ton of features!</span>
+      <span class="message">Tired after a long day? We’ll take care of that!)</span>
+      <span class="message">Nikita Zuev, hi.</span>
+    </div>
+    <div class="message-line"></div>
+
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="progress-percent" id="progressPercent">0%</span>
+        <span class="progress-file" id="progressFile">initializing...</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="discord-footer">
+    discord.gg/ab4b8Ue7qe
   </div>
 
   <script>
     (function() {
-      window.setLoad = function() {};
-      window.DownloadingFile = function() {};
-      window.SetStatusChanged = function() {};
-      window.SetFilesTotal = function() {};
-      window.SetFilesNeeded = function() {};
-      window.GameDetails = function() {};
+      const progressFill    = document.getElementById('progressFill');
+      const progressPercent = document.getElementById('progressPercent');
+      const progressFile    = document.getElementById('progressFile');
 
-      const SLIDESHOW_PATH = 'images/';
-      const SLIDESHOW_EXT = '.jpg';
-      const SLIDESHOW_COUNT = 61;
-      const SLIDE_INTERVAL = 7000;
-      const PHOTO_CREDITS = [
-        'Niko Heizenberg', // 1.jpg
-        'Гриша', // 2.jpg
-        'Niko Heizenberg', // 3.jpg
-        'Niko Heizenberg', // 4.jpg
-        'Konekt (SGT)', // 5.jpg
-        'Konekt (SGT)', // 6.jpg
-        'Ledak', // 7.jpg
-        'Niko Heizenberg', // 8.jpg
-        'Konekt (SGT)', // 9.jpg
-        'Konekt (SGT)', // 10.jpg
-        'Niko Heizenberg', // 11.jpg
-        'Niko Heizenberg', // 12.jpg
-        'Azazlo', // 13.jpg
-        'Azazlo', // 14.jpg
-        'Azazlo', // 15.jpg
-        'Azazlo', // 16.jpg
-        'Azazlo', // 17.jpg
-        'Azazlo', // 18.jpg
-        'Azazlo', // 19.jpg
-        'Azazlo', // 20.jpg
-        'Ledak', // 21.jpg
-        'Niko Heizenberg', // 22.jpg
-        'ZOV SIGMO OBEBAS', // 23.jpg
-        'Niko Heizenberg', // 24.jpg
-        'Гриша', // 25.jpg
-        'Гриша', // 26.jpg
-        'Nerf.Man', // 27.jpg
-        'ZOV SIGMO OBEBAS', // 28.jpg
-        'Гриша', // 29.jpg
-        'Niko Heizenberg', // 30.jpg
-        'Гриша', // 31.jpg
-        'Гриша', // 32.jpg
-        'Гриша', // 33.jpg
-        'Гриша', // 34.jpg
-        'Гриша', // 35.jpg
-        'Гриша', // 36.jpg
-        'Гриша', // 37.jpg
-        'Гриша', // 38.jpg
-        'МЫНОСКА)))', // 39.jpg
-        'Azazlo', // 40.jpg
-        'Niko Heizenberg', // 41.jpg
-        'Niko Heizenberg', // 42.jpg
-        'Niko Heizenberg', // 43.jpg
-        'Niko Heizenberg', // 44.jpg
-        'Niko Heizenberg', // 45.jpg
-        'Гриша', // 46.jpg
-        'Niko Heizenberg', // 47.jpg
-        'Гриша', // 48.jpg
-        'Niko Heizenberg', // 49.jpg
-        'ZOV SIGMO OBEBAS', // 50.jpg
-        'Niko Heizenberg', // 51.jpg
-        'Niko Heizenberg', // 52.jpg
-        'Гриша', // 53.jpg
-        'Гриша', // 54.jpg
-        'Niko Heizenberg', // 55.jpg
-        'Niko Heizenberg', // 56.jpg
-        'Azazlo', // 57.jpg
-        'Niko Heizenberg', // 58.jpg
-        'Azazlo', // 59.jpg
-        'Гриша', // 60.jpg
-        'Niko Heizenberg'  // 61.jpg
-      ];
-      const DEFAULT_PHOTO_CREDIT = '';
+      let currentProgress = 0;
+      let targetProgress  = 0;
+      let smoothInterval  = null;
 
-      const creditEl = document.getElementById('photoCredit');
-      const creditNameEl = document.getElementById('photoCreditName');
-
-      function showPhotoCredit(imageIndex) {
-        if (!creditEl || !creditNameEl) return;
-        const name = (PHOTO_CREDITS[imageIndex] || DEFAULT_PHOTO_CREDIT || '').trim();
-        if (name) {
-          creditNameEl.textContent = name;
-          creditEl.style.display = '';
-          creditEl.style.opacity = '1';
-        } else {
-          creditNameEl.textContent = '';
-          creditEl.style.opacity = '0';
-        }
+      function smoothProgress() {
+        if (smoothInterval) return;
+        smoothInterval = setInterval(() => {
+          if (Math.abs(currentProgress - targetProgress) < 0.1) {
+            currentProgress = targetProgress;
+            progressFill.style.width = currentProgress + '%';
+            progressPercent.textContent = Math.round(currentProgress) + '%';
+            clearInterval(smoothInterval);
+            smoothInterval = null;
+            return;
+          }
+          currentProgress += (targetProgress - currentProgress) * 0.15;
+          progressFill.style.width = currentProgress + '%';
+          progressPercent.textContent = Math.round(currentProgress) + '%';
+        }, 30);
       }
 
-      (function initParallax() {
-        const parallaxLayer = document.getElementById('bgParallax');
-        if (!parallaxLayer) return;
-
-        const images = [];
-        for (let i = 1; i <= SLIDESHOW_COUNT; i++) {
-          images.push(SLIDESHOW_PATH + i + SLIDESHOW_EXT);
+      window.setLoad = function(percentage) {
+        const p = Math.max(0, Math.min(100, Number(percentage) || 0));
+        if (p > targetProgress) {
+          targetProgress = p;
+          smoothProgress();
         }
+      };
 
-        let order = [];
-        let idx = 0;
-
-        function shuffled(n) {
-          const a = Array.from({length: n}, (_, i) => i);
-          for (let i = a.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [a[i], a[j]] = [a[j], a[i]];
-          }
-          return a;
+      const origDownloadingFile = window.DownloadingFile;
+      window.DownloadingFile = function(filename) {
+        if (typeof origDownloadingFile === 'function') {
+          try { origDownloadingFile(filename); } catch(e) {}
         }
-
-        function setImage(imageIndex) {
-          parallaxLayer.style.backgroundImage = 'url("' + images[imageIndex] + '")';
-          showPhotoCredit(imageIndex);
+        if (progressFile && filename) {
+          progressFile.textContent = filename.length > 34
+            ? filename.slice(0, 31) + '...'
+            : filename;
         }
+      };
 
-        function showFirst() {
-          order = shuffled(images.length);
-          idx = 0;
-          setImage(order[idx]);
-          parallaxLayer.classList.add('active');
+      const origSetStatusChanged = window.SetStatusChanged;
+      window.SetStatusChanged = function(status) {
+        if (typeof origSetStatusChanged === 'function') {
+          try { origSetStatusChanged(status); } catch(e) {}
         }
-
-        function nextImage() {
-          parallaxLayer.classList.remove('active');
-
-          idx = (idx + 1) % order.length;
-          if (idx === 0) order = shuffled(images.length);
-
-          const nextIndex = order[idx];
-
-          setTimeout(() => {
-            setImage(nextIndex);
-            parallaxLayer.classList.add('active');
-          }, 250);
+        if (progressFile && status) {
+          progressFile.textContent = status;
         }
+        if (status === 'Workshop Complete') window.setLoad(80);
+        else if (status === 'Client info sent!') window.setLoad(95);
+        else if (status === 'Starting Lua...')   window.setLoad(100);
+      };
 
-        let targetX = 0, targetY = 0;
-        let currentX = 0, currentY = 0;
-
-        function animateParallax() {
-          currentX += (targetX - currentX) * 0.06;
-          currentY += (targetY - currentY) * 0.06;
-          parallaxLayer.style.transform =
-            'translate3d(' + (currentX * -22) + 'px,' + (currentY * -16) + 'px, 0) scale(1.08)';
-          requestAnimationFrame(animateParallax);
+      const origSetFilesTotal = window.SetFilesTotal;
+      window.SetFilesTotal = function(total) {
+        if (typeof origSetFilesTotal === 'function') {
+          try { origSetFilesTotal(total); } catch(e) {}
         }
+        window._totalFiles = total;
+        if (progressFile) progressFile.textContent = 'files: ' + total;
+      };
 
-        window.addEventListener('mousemove', (e) => {
-          const nx = (e.clientX / window.innerWidth) * 2 - 1;
-          const ny = (e.clientY / window.innerHeight) * 2 - 1;
-          targetX = nx;
-          targetY = ny;
-        }, { passive: true });
-
-        animateParallax();
-
-        let loaded = 0;
-        images.forEach((src) => {
-          const im = new Image();
-          im.onload = im.onerror = () => {
-            loaded++;
-            if (loaded === images.length) start();
-          };
-          im.src = src;
-        });
-
-        let started = false;
-        function start() {
-          if (started) return;
-          started = true;
-          showFirst();
-          setInterval(nextImage, SLIDE_INTERVAL);
+      const origSetFilesNeeded = window.SetFilesNeeded;
+      window.SetFilesNeeded = function(needed) {
+        if (typeof origSetFilesNeeded === 'function') {
+          try { origSetFilesNeeded(needed); } catch(e) {}
         }
+        if (window._totalFiles && window._totalFiles > 0) {
+          const p = 100 - Math.round((needed / window._totalFiles) * 100);
+          window.setLoad(p);
+        }
+      };
 
-        setTimeout(start, 2000);
-      })();
+      const origGameDetails = window.GameDetails;
+      window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
+        if (typeof origGameDetails === 'function') {
+          try { origGameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode); } catch(e) {}
+        }
+        window.setLoad(1);
+        if (progressFile) progressFile.textContent = 'connecting...';
+      };
 
-      const MUSIC_FILES = ['main_music.mp3','loading_music.mp3'];
+      let fallbackActive = true;
+      let fallbackProgress = 0;
+
+      const fallbackCheck = setInterval(() => {
+        if (window._totalFiles && window._totalFiles > 0) {
+          fallbackActive = false;
+          clearInterval(fallbackCheck);
+        }
+      }, 500);
+
+      const fallbackInterval = setInterval(() => {
+        if (!fallbackActive) {
+          clearInterval(fallbackInterval);
+          return;
+        }
+        if (fallbackProgress < 85) {
+          fallbackProgress += Math.random() * 1.5 + 0.3;
+          if (fallbackProgress > 85) fallbackProgress = 85;
+          window.setLoad(fallbackProgress);
+        }
+      }, 400);
+
+      setTimeout(() => {
+        if (targetProgress < 1) {
+          window.setLoad(1);
+          if (progressFile) progressFile.textContent = 'loading...';
+        }
+      }, 3000);
+
+      const MUSIC_FILES = ['track1.mp3','track2.mp3','track3.mp3','track4.mp3','track5.mp3','track6.mp3','track7.mp3','track8.mp3','track9.mp3','track10.mp3','track11.mp3','track12.mp3','track13.mp3','track14.mp3','track15.mp3','track16.mp3','track17.mp3','track18.mp3','track19.mp3','track20.mp3','track21.mp3','track22.mp3','track23.mp3'];
       const MUSIC_PATH = 'music/';
-      const TARGET_VOLUME = 0.5;
+      const TARGET_VOLUME = 0.05;
       const FADE_IN_TIME = 4000;
 
       const TRACK_NAMES = {
-        'main_music.mp3':  'GTA V MENU THEME',
-        'loading_music.mp3':  'GTA V LOADING THEME',
+        'track1.mp3':  'Zoom Noir',
+        'track2.mp3':  'just leave me to bleed',
+        'track3.mp3':  'SR20DET',
+        'track4.mp3':  'NEO INDUSTRIAL',
+        'track5.mp3':  'Logic',
+        'track6.mp3':  'Hatred',
+        'track7.mp3':  'shedon\'tluvyou',
+        'track8.mp3':  'the last thing she sent me',
+        'track9.mp3':  'BIOS - Slowed',
+        'track10.mp3': 'Monochrome LCD',
+        'track11.mp3': 'ice - Slowed',
+        'track12.mp3': 'popipo00',
+        'track13.mp3': '2neural',
+        'track14.mp3': 'U Weren\'t Here I Really Miss You',
+        'track15.mp3': 'genesis',
+        'track16.mp3': 'Lagtrain',
+        'track17.mp3': '#21',
+        'track18.mp3': 'Feelings - Slowed',
+        'track19.mp3': 'Mø4.5b',
+        'track20.mp3': 'Pulsewidth',
+        'track21.mp3': 'Maria...?',
+        'track22.mp3': 'zero',
+        'track23.mp3': 'still love you'
       };
 
       let audio = null;
@@ -515,6 +555,77 @@
       }
 
       tryStartImmediately();
+
+      const canvas = document.getElementById('bgCanvas');
+      const ctx = canvas.getContext('2d');
+      let W, H;
+      const xbars = 17, ybars = 30;
+      let animTime = 0;
+      const speed = 30;
+
+      function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+      function draw() {
+        animTime += 0.016;
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#0d0d0f';
+        ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = 'rgba(100, 20, 20, 0.12)';
+        ctx.lineWidth = 1;
+        for (let i = 1; i <= xbars + 1; i++) {
+          const yPos = (H / xbars) * (i - 1) + (animTime * speed % (H / xbars));
+          ctx.beginPath(); ctx.moveTo(0, yPos); ctx.lineTo(W, yPos); ctx.stroke();
+        }
+        for (let i = 1; i <= ybars + 1; i++) {
+          const xPos = (W / ybars) * i - (animTime * speed % (W / ybars));
+          ctx.beginPath(); ctx.moveTo(xPos, 0); ctx.lineTo(xPos, H); ctx.stroke();
+        }
+        requestAnimationFrame(draw);
+      }
+      window.addEventListener('resize', resize);
+      resize(); draw();
+
+      const messages = document.querySelectorAll('.message');
+      const totalMessages = messages.length;
+      let currentMessageIndex = 0;
+      function getRandomDifferentIndex() {
+        if (totalMessages <= 1) return 0;
+        let n;
+        do { n = Math.floor(Math.random() * totalMessages); } while (n === currentMessageIndex);
+        return n;
+      }
+      function nextMessage() {
+        messages[currentMessageIndex].classList.remove('active');
+        currentMessageIndex = getRandomDifferentIndex();
+        messages[currentMessageIndex].classList.add('active');
+      }
+      setInterval(nextMessage, 6001);
+
+      const emojiContainer = document.getElementById('fallingEmojis');
+      const EMOJI_FILES = Array.from({length: 100}, (_, i) => String(i + 1).padStart(3, '0') + '.png');
+      const EMOJI_PATH = 'emoji/';
+      const MAX_EMOJIS = 24;
+
+      function createEmoji() {
+        if (emojiContainer.children.length >= MAX_EMOJIS) return;
+        const img = document.createElement('img');
+        img.src = EMOJI_PATH + EMOJI_FILES[Math.floor(Math.random() * EMOJI_FILES.length)];
+        img.alt = '';
+        img.style.left = Math.random() * 100 + 'vw';
+        const duration = 8 + Math.random() * 10;
+        const delay = Math.random() * 10;
+        const size = 22 + Math.random() * 28;
+        const blurAmount = 0.2 + Math.random() * 0.5;
+        img.style.width = size + 'px';
+        img.style.animationDuration = duration + 's';
+        img.style.animationDelay = delay + 's';
+        img.style.filter = `blur(${blurAmount}px)`;
+        img.style.opacity = 0.35 + Math.random() * 0.2;
+        emojiContainer.appendChild(img);
+        const totalLifetime = (duration + delay) * 1000 + 800;
+        setTimeout(() => { if (img.parentNode) img.remove(); }, totalLifetime);
+      }
+      for (let i = 0; i < 10; i++) createEmoji();
+      setInterval(createEmoji, 800);
 
     })();
   </script>
